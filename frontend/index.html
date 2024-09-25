@@ -1,13 +1,33 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>HelloPentagon</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Malware Detection</title>
+    <link rel="stylesheet" href="./src/css/style.css"> <!-- Link to external CSS file -->
+</head>
+
+<body>
+    <header>
+        <div class="logo">&#x2B1F; Malware Detection</div>
+    </header>
+    <main>
+        <section>
+            <form id="upload-form" action="/upload" method="POST" enctype="multipart/form-data">
+                <label for="file-upload" class="custom-file-upload">
+                    Choose file
+                </label>
+                <input id="file-upload" type="file" name="file" required />
+                <p id="file-name"></p>
+                <button type="button" id="confirm-button" style="display:none;">Confirm Upload</button>
+                <button type="submit" id="submit-button" style="display:none;">Upload</button>
+            </form>
+        </section>
+    </main>
+    <footer>
+        <p>By submitting a file above, you are agreeing to our Terms of Service and Privacy Notice, and to the sharing of your sample submission with the security community. Please do not submit any personal information; we are not responsible for the contents of your submission.</p>
+    </footer>
+
+    <script src="./src/js/script.js"></script> <!-- Link to external JavaScript file -->
+</body>
 </html>
