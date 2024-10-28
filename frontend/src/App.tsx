@@ -1,12 +1,12 @@
 import './App.css';
-import FileUpload from './components/FileUpload';
+import Dashboard from './components/Dashboard/Dashboard';
+import FileUpload from './components/FileUpload/FileUpload';
 
 function App() {
   return (
     <>
       <div>
-        <h1>File Upload</h1>
-        <FileUpload />
+        <Dashboard />
       </div>
     </>
   );
