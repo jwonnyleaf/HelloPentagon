@@ -1,0 +1,55 @@
+.alerts {
+    text-align: left;
+  }
+  
+  button {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 20px;
+  }
+  
+  .recommendations-box {
+    background-color: #e6f7ff; /* Light blue background */
+    border: 1px solid #91d5ff; /* Slightly darker blue border */
+    padding: 20px;
+    margin: 20px auto;
+    width: 80%;
+    max-width: 500px;
+    border-radius: 8px;
+    text-align: left;
+  }
+  
+  .recommendations-box h2 {
+    color: #1890ff; /* Darker blue for heading */
+    margin-top: 0;
+  }
+  
+  .recommendations-box p {
+    margin: 10px 0;
+  }
+  
+  .recommendations-box button {
+    padding: 8px 16px;
+    font-size: 14px;
+    color: white;
+    background-color: #1890ff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .view-recommendations-button {
+    padding: 10px 20px;
+    font-size: 16px;
+    color: black;
+    background-color: #add8e6; /* Different color, e.g., green */
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 20px;
+  }
+  
+  .view-recommendations-button:hover {
+    background-color: #87ceeb; /* Darker shade for hover */
+  }
