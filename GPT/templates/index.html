@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSCE634 - Intelligent Malware Detection Assistant</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 0;
+            background-color: #f9f9f9;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        p, h2 {
+            color: #555;
+            line-height: 1.6;
+        }
+        .response-container {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            line-height: 1.6;
+            max-height: 700px;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+        .response-container h2 {
+            margin-top: 0;
+        }
+        .response-container p {
+            margin-bottom: 15px;
+        }
+        .message {
+            margin-bottom: 20px;
+        }
+        .user, .assistant {
+            margin-bottom: 8px;
+        }
+        .user {
+            font-weight: lighter;
+            color: #0066cc;
+        }
+        .assistant {
+            font-weight: lighter;
+            color: black;
+        }
+        .refresh-container {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 10px;
+        }
+        .refresh-button {
+            padding: 10px 15px;
+            background-color: #cc0000;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .refresh-button:hover {
+            background-color: #a00000;
+        }
+        .chat-input {
+            display: flex;
+            margin-top: 10px;
+            align-items: center;
+        }
+        .chat-input input[type="text"] {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px 0 0 5px;
+            font-size: 14px;
+        }
+        .chat-input button {
+            padding: 10px 15px;
+            border: none;
+            background-color: #0066cc;
+            color: white;
+            cursor: pointer;
+            border-radius: 0 5px 5px 0;
+            font-size: 14px;
+        }
+        .chat-input button:hover {
+            background-color: #004b99;
+        }
+        .initial-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 1px solid #e0e0e0;
+        }
+        .initial-buttons button {
+            padding: 10px 15px;
+            background-color: #0066cc;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .initial-buttons button:hover {
+            background-color: #004b99;
+        }
+        .follow-up-prompt {
+            margin-top: 15px;
+            font-weight: bold;
+            padding-left: 10px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <h1>CSCE634 - Intelligent Malware Detection Assistant</h1>
+
+    <!-- Refresh Button aligned to the right -->
+    <div class="refresh-container">
+        <a href="{{ url_for('refresh') }}" class="refresh-button">Refresh Conversation</a>
+    </div>
+
+    <!-- Display conversation history with oldest messages at the top -->
+    <div class="response-container" id="response-container">
+        <h2>Conversation:</h2>
+        {% for message in conversation %}
+            <div class="message">
+                {% if message.role == 'user' %}
+                    <p class="user">You: {{ message.content | replace("\n", "<br>") | safe }}</p>
+                {% elif message.role == 'assistant' %}
+                    <p class="assistant">Assistant: {{ message.content | replace("\n", "<br>") | safe }}</p>
+                {% elif message.role == 'system' %}
+                    <p><em>{{ message.content | replace("\n", "<br>") | safe }}</em></p>
+                {% endif %}
+            </div>
+        {% endfor %}
+
+        <!-- Initial selection of novice or expert, displayed only for the first question -->
+        {% if not user_type_selected %}
+            <form method="POST" class="initial-buttons">
+                <button type="submit" name="user_type" value="novice">Novice</button>
+                <button type="submit" name="user_type" value="expert">Expert</button>
+            </form>
+        {% endif %}
+    </div>
+
+    <!-- Follow-up prompt just above the response box if user_type_selected is true -->
+    {% if user_type_selected %}
+        <div class="follow-up-prompt">Do you need additional information?</div>
+        <form method="POST" class="chat-input">
+            <input type="text" name="user_input" placeholder="Type your response..." required>
+            <button type="submit">Submit</button>
+        </form>
+    {% endif %}
+
+    <script>
+        // Scroll to the bottom of the response container
+        function scrollToBottom() {
+            var container = document.getElementById("response-container");
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // Call the function on page load and whenever the page updates
+        window.addEventListener('load', scrollToBottom);
+
+        // Use MutationObserver to detect changes in the conversation container and scroll to bottom
+        var observer = new MutationObserver(scrollToBottom);
+        observer.observe(document.getElementById("response-container"), { childList: true });
+    </script>
+</body>
+</html>
