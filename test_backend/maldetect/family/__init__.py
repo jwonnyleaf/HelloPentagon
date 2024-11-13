@@ -1,0 +1,1 @@
+from .malwarefamily import MalwareFamily
