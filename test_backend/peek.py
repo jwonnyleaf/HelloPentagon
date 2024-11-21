@@ -1,10 +1,15 @@
-import ember
-import pickle
-ember_path = "/Users/soumyajyotidutta/Desktop/AV/test_backend/dataset"
-X_train_18, y_train_18, X_test_18, y_test_18 = ember.read_vectorized_features(ember_path, feature_version=2)
+import sys
+import os
+import numpy as np
+parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.insert(0, parent_dir)
 
-pickle.dump(X_train_18, open('./dataset/X_train.pkl', 'wb'))
-pickle.dump(y_train_18, open('./dataset/y_train.pkl', 'wb'))
-pickle.dump(X_test_18, open('./dataset/X_test.pkl', 'wb'))
-pickle.dump(y_test_18, open('./dataset/y_test.pkl', 'wb'))
+from maldetect.classification import ClassifyMalware
+from maldetect.dataset import DataLoader
+clf = ClassifyMalware()
+loader = DataLoader()
 
+data = loader.load_testdata()
+samplefeature1 = data.iloc[200]
+
+print(samplefeature1.shape)

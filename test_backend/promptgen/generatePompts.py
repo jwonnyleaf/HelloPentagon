@@ -6,6 +6,7 @@ sys.path.insert(0, parent_dir)
 from maldetect.classification import ClassifyMalware
 from maldetect.dataset import DataLoader
 from maldetect.family import MalwareFamily
+from maldetect.extractor import FeatureExtractor
 
 
 def generate(classificationReport, familyReport):
@@ -18,14 +19,20 @@ def main():
     clf = ClassifyMalware()
     fam = MalwareFamily()
     loader = DataLoader()
+    ext = FeatureExtractor()
 
-    data = loader.load_data()
-    metadata = loader.load_metadata()
-    sample = data.iloc[134432]
-    sample_sha256 = metadata.iloc[134432][0]
+    # data = loader.load_data()
+    # metadata = loader.load_metadata()
+    # sample = data.iloc[134432]
+    # sample_sha256 = metadata.iloc[134432][0]
+    myfeatures = ext.extract('/Users/soumyajyotidutta/Desktop/AV/test_backend/tests/file.exe')
+    sha256 = fam.calculate_sha256('/Users/soumyajyotidutta/Desktop/AV/test_backend/tests/file.exe')
 
-    classificationReport = clf.classify(sample)
-    familyReport = fam.getfamily_fromHash(sample_sha256)
-    print(generate(classificationReport, familyReport))
+    classificationReport = clf.classify(myfeatures['bodmas_features'])
+    familyReport = fam.getfamily_fromHash(sha256)
+    # print(generate(classificationReport, familyReport))
+    print(classificationReport)
+    print(familyReport)
+    
 if __name__ == '__main__':
     main()

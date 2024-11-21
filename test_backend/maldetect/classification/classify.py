@@ -22,10 +22,13 @@ class ClassifyMalware():
             label = prediction_hard
             cnf = max(hard_clf.predict_proba([features])[0])
             
-        if label == 0:
+        if label == 0 and cnf > 0.85:
             return ('goodware', cnf)
-        if label == 1:
+        elif label == 1:
             return ('malware', cnf)
+        else:
+            return (f'Needs Attention! Initial Thoughts: Malware', cnf)
+        
         
         
         
