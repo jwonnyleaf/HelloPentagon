@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+Results
+{% endblock title %}
+
+
+{% block style %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+{% endblock style %}
+
+
+{% block main %}
+<h3>Results:</h3>
+<table class="table table-striped table-hover">
+    <thead>
+        <tr>
+            <th>Challenge</th>
+            <th>Submission Time</th>
+            <th>Accuracy</th>
+            <th>Features</th>
+            <th>Feature Importance Graph</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for result in results %}
+            <tr>
+                <td>{{ result.challenge }}</td>
+                <td>{{ result.created_at }}</td>
+                <td>{{ result.accuracy }}</td>
+                <td>{{ result.features }}</td>
+                <td><a href="{{ result.feature_importance_graph.url }}" target="_blank">View</a></td>
+            </tr>
+        {% endfor %}
+    </tbody>
+
+</table>
+
+<a href="{% url 'challenges' %}" class="btn btn-success">Get Back to Challenges</a>
+<a href="{% url 'leaderboard' %}" class="btn btn-warning">Go to Leaderboard</a>
+{% endblock main %}
+
+
+{% block js %}
+<script src="{% static 'js/dashboard.js' %}"></script>
+<script src="{% static 'js/results.js' %}"></script>
+{% endblock js %}

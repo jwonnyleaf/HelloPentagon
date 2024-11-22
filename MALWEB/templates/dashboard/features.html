@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+Features
+{% endblock title %}
+
+
+{% block style %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+<link rel="stylesheet" href="{% static 'css/features.css' %}">
+{% endblock style %}
+
+
+{% block main %}
+<h3>Features:</h3>
+<div class="container">
+    <div class="row" id="featuresContainer"></div>
+    <div class="row justify-content-center">
+        <button class="btn btn-success train-btn" id="trainButton">Train</button>
+    </div>
+</div>
+{% endblock main %}
+
+
+{% block js %}
+<script src="{% static 'js/dashboard.js' %}"></script>
+<script src="{% static 'js/features.js' %}"></script>
+{% endblock js %}
