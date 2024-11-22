@@ -1,0 +1,30 @@
+<nav class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0">
+    <a class="navbar-brand col-sm-3 col-md-2 mr-0 text-center" href="{% url 'dashboard' %}">Welcome!</a>
+
+    <ul class="navbar-nav px-3 d-flex align-items-center">
+        <li class="nav-item text-nowrap">
+            <p class="nav-link mb-0"><strong>Username:</strong> {{ user.username}}</p>
+        </li>
+    </ul>
+
+    <ul class="navbar-nav px-3 d-flex align-items-center">
+        <li class="nav-item text-nowrap">
+            <p class="nav-link mb-0"><strong>Challenge: </strong><span id="nav_challenge">Not Selected</span></p>
+        </li>
+    </ul>
+
+    <ul class="navbar-nav px-3 d-flex align-items-center">
+        <li class="nav-item text-nowrap">
+            <p class="nav-link mb-0"><strong>Budget: </strong><span id="budget">No Budget</span></p>
+        </li>
+    </ul>
+
+    <ul class="navbar-nav px-3 ml-auto">
+        <li class="nav-item text-nowrap">
+            <form method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-danger w-100">Logout</button>
+            </form>
+        </li>
+    </ul>
+</nav>

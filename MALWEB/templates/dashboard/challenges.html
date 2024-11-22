@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+Challenges
+{% endblock title %}
+
+
+{% block style %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+{% endblock style %}
+
+
+{% block main %}
+<h3>Challenges:</h3>
+<div class="d-flex flex-column" style="width: 20%;">
+    <button class="btn btn-sm btn-secondary mb-2" id="challenge1" onclick="setActiveChallenge('Challenge 1')">Challenge 1</button>
+    <button class="btn btn-sm btn-secondary mb-2" id="challenge2" onclick="setActiveChallenge('Challenge 2')">Challenge 2</button>
+    <button class="btn btn-sm btn-secondary mb-2" id="challenge3" onclick="setActiveChallenge('Challenge 3')">Challenge 3</button>
+</div>
+
+<button class="btn btn-secondary" id="btnGotoFeatures" onclick="return GotoFeatures();">Go To Feature Selection</button>
+{% endblock main %}
+
+
+{% block js %}
+<script src="{% static 'js/dashboard.js' %}"></script>
+<script src="{% static 'js/challenges.js' %}"></script>
+{% endblock js %}

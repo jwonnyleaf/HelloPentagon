@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+Dashboard
+{% endblock title %}
+
+
+{% block style %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+{% endblock style %}
+
+
+{% block main %}
+<h3>Some Explaination</h3>
+<p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Molestias, ab nam iusto quisquam possimus tenetur, assumenda
+    asperiores nemo laboriosam iure voluptatum quidem quae accusamus minus officiis odit est quasi deleniti.</p>
+{% endblock main %}
+
+
+{% block js %}
+<script src="{% static 'js/dashboard.js' %}"></script>
+{% endblock js %}
