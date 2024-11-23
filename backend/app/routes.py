@@ -33,7 +33,6 @@ for handler in logger.handlers:
 
 routes = Blueprint("routes", __name__)
 
-# Load Models
 # Initial Malware Classifier
 classifer = MalwareClassifier()
 logger.info(f"{len(classifer.model)} models loaded successfully.")
@@ -62,10 +61,22 @@ def upload():
         peExtract = PEAttributeExtractor(file_data)
         peAttributes = peExtract.extract()
 
-        pred = classifer.classify(bodmasFeatures)
-        print(pred)
+        label, confidence = classifer.classify(bodmasFeatures)
 
-        return jsonify({"message": "File uploaded successfully."}), 200
+        logger.info(f"[Pentagon] Prediction: {label}, Confidence: {confidence:.2f}")
+
+        return (
+            jsonify(
+                {
+                    "message": "File processed successfully.",
+                    "prediction": {
+                        "label": label,
+                        "confidence": round(confidence, 2),
+                    },
+                }
+            ),
+            200,
+        )
     except Exception as e:
         logger.error(f"Error during processing: {str(e)}", exc_info=True)
         return jsonify({"error": "Internal server error."}), 500

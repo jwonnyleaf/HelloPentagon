@@ -6,6 +6,10 @@ warnings.filterwarnings("ignore", category=UserWarning, module="xgboost")
 
 
 class MalwareClassifier:
+    GOODWARE = "Goodware"
+    MALWARE = "Malware"
+    NEEDS_ATTENTION = "Needs Attention"
+
     def __init__(self):
         self.model = {}
         self.model["soft"] = pickle.load(open("app/models/xgboost_model.pkl", "rb"))
@@ -14,7 +18,6 @@ class MalwareClassifier:
         )
 
     def classify(self, features):
-        label, cnf = None, None
         soft_clf, hard_clf = self.model["soft"], self.model["hard"]
 
         prediction_soft = soft_clf.predict([features])
@@ -22,14 +25,14 @@ class MalwareClassifier:
 
         if max(soft_clf.predict_proba([features])[0]) > 0.75:
             label = prediction_soft
-            cnf = max(soft_clf.predict_proba([features])[0])
+            confidence = float(max(soft_clf.predict_proba([features])[0]))
         else:
             label = prediction_hard
-            cnf = max(hard_clf.predict_proba([features])[0])
+            confidence = float(max(hard_clf.predict_proba([features])[0]))
 
-        if label == 0 and cnf > 0.85:
-            return ("goodware", cnf)
+        if label == 0 and confidence > 0.85:
+            return (self.GOODWARE, confidence)
         elif label == 1:
-            return ("malware", cnf)
+            return (self.MALWARE, confidence)
         else:
-            return ("needs human inspection", cnf)
+            return (self.NEEDS_ATTENTION, confidence)
