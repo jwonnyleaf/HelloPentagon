@@ -1,9 +1,13 @@
 import os
 import logging
 import joblib
+import sqlite3
 from flask import Blueprint, request, jsonify
+from werkzeug.security import generate_password_hash
+from app.database.models.user import User
 from app.utils.extractor import BODMASFeatureExtractor, PEAttributeExtractor
 from app.utils.classifier import MalwareClassifier
+from app.database.database import db
 
 
 class ColorFormatter(logging.Formatter):
@@ -80,3 +84,32 @@ def upload():
     except Exception as e:
         logger.error(f"Error during processing: {str(e)}", exc_info=True)
         return jsonify({"error": "Internal server error."}), 500
+
+
+@routes.route("/api/signup", methods=["POST"])
+def signup():
+    try:
+        data = request.json
+        name = data.get("name")
+        email = data.get("email")
+        password = data.get("password")
+
+        if not name or not email or not password:
+            return jsonify({"error": "All fields are required"}), 400
+
+        hashed_password = generate_password_hash(password)
+
+        existing_user = User.query.filter_by(email=email).first()
+        if existing_user:
+            return jsonify({"error": "Email already exists"}), 400
+
+        new_user = User(name=name, email=email, password=hashed_password)
+
+        db.session.add(new_user)
+        db.session.commit()
+
+        return jsonify({"message": "User registered successfully"}), 201
+
+    except Exception as e:
+        logger.error(f"Error during registration: {str(e)}", exc_info=True)
+        return jsonify({"error": "An error occurred during registration"}), 500

@@ -18,7 +18,7 @@ RUN mkdir -p $MAMBA_ROOT_PREFIX/pkgs && \
 # Install dependencies
 COPY requirements_conda.txt .
 RUN micromamba install -y -n base --channel conda-forge --file requirements_conda.txt && \
-    micromamba install -y -n base --channel conda-forge python scikit-learn==1.5.2 numpy=1.19 pandas==1.3.5 xgboost lightgbm pefile flask flask-cors && \
+    micromamba install -y -n base --channel conda-forge python scikit-learn==1.5.2 numpy=1.19 pandas==1.3.5 xgboost lightgbm pefile flask flask-cors sqlalchemy Flask-SQLAlchemy Werkzeug && \
     micromamba clean --all --yes
 
 # Copy all EMBER files

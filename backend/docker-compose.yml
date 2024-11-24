@@ -1,6 +1,8 @@
 services:
   flask-app:
     build: .
+    volumes:
+      - ./app/database:/app/app/database
     ports:
       - "5001:5001"
     environment:

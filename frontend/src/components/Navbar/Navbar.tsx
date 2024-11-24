@@ -1,5 +1,7 @@
 import {
+  Avatar,
   Badge,
+  Box,
   Divider,
   Drawer,
   List,
@@ -13,6 +15,9 @@ import {
 
 // Constants
 import { drawerWidth } from '../../constants';
+
+// Images
+import FileAnalysisCardIMG from '@assets/images/fileanalysisimage.png';
 
 // Icons
 import HomeIcon from '@mui/icons-material/Home';
@@ -51,8 +56,16 @@ const Navbar: React.FC<NavbarProps> = ({ onNavItemClick, activePage }) => {
         },
       }}
     >
-      <div className="bg-white h-full py-5">
-        <Toolbar className="text-cyan">
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          height: '100%',
+          backgroundColor: 'white',
+        }}
+      >
+        {/* Toolbar Section */}
+        <Toolbar>
           <Typography
             variant="h6"
             className="flex items-center gap-3 cursor-pointer"
@@ -64,7 +77,9 @@ const Navbar: React.FC<NavbarProps> = ({ onNavItemClick, activePage }) => {
           </Typography>
         </Toolbar>
         <Divider sx={{ marginY: '8px', backgroundColor: '#ccc' }} />
-        <List sx={{ paddingX: '1rem' }}>
+
+        {/* Navigation Section */}
+        <List sx={{ paddingX: '1rem', flexGrow: 1 }}>
           {navItems.map((item, index) => (
             <ListItem key={index} disablePadding>
               <ListItemButton
@@ -119,7 +134,58 @@ const Navbar: React.FC<NavbarProps> = ({ onNavItemClick, activePage }) => {
             </ListItem>
           ))}
         </List>
-      </div>
+
+        {/* Account Section */}
+        <Box
+          sx={{
+            backgroundColor: '#5A4FCF',
+            backgroundImage: `url(${FileAnalysisCardIMG})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            borderRadius: '16px',
+            padding: '16px',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            margin: '1rem',
+            height: '200px',
+          }}
+        >
+          <Avatar
+            sx={{
+              backgroundColor: '#fff',
+              width: 48,
+              height: 48,
+            }}
+          >
+            <Typography sx={{ color: 'black', fontWeight: 700 }}>JD</Typography>
+          </Avatar>
+          <Box>
+            <Typography
+              variant="body1"
+              sx={{
+                fontFamily: 'Montserrat',
+                fontSize: '1.5rem',
+                fontWeight: 700,
+                color: 'white',
+              }}
+            >
+              John Doe
+            </Typography>
+            <Typography
+              variant="body2"
+              sx={{
+                fontFamily: 'Montserrat',
+                fontSize: '1.25rem',
+                color: 'white',
+                opacity: 0.8,
+              }}
+            >
+              johndoe@tamu.edu
+            </Typography>
+          </Box>
+        </Box>
+      </Box>
     </Drawer>
   );
 };
