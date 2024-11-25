@@ -56,7 +56,9 @@ const SignInContainer = styled(Stack)(({ theme }) => ({
   },
 }));
 
-export default function SignIn(props: { login: () => void }) {
+export default function SignIn(props: {
+  login: (email: string, username: string) => void;
+}) {
   const { login } = props;
   const [emailError, setEmailError] = React.useState(false);
   const [emailErrorMessage, setEmailErrorMessage] = React.useState('');
@@ -93,11 +95,9 @@ export default function SignIn(props: { login: () => void }) {
         body: JSON.stringify({ email, password }),
       });
 
-      console.log(response, response.ok);
-
       if (response.ok) {
         const result = await response.json();
-        login();
+        login(result.user['email'], result.user['name']);
         navigate('/');
       } else {
         const error = await response.json();

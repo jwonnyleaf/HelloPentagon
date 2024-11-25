@@ -19,10 +19,12 @@ import Settings from '../Settings/Settings';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 
 interface DashboardProps {
+  email: string | null;
+  username: string | null;
   logout: () => void;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ logout }) => {
+const Dashboard: React.FC<DashboardProps> = ({ email, username, logout }) => {
   const [activeContent, setActiveContent] = useState('Overview');
   const contentMapping: Record<string, JSX.Element> = {
     Overview: <Overview onNavItemClick={setActiveContent} />,
@@ -33,7 +35,12 @@ const Dashboard: React.FC<DashboardProps> = ({ logout }) => {
   };
   return (
     <Box sx={{ display: 'flex' }}>
-      <Navbar activePage={activeContent} onNavItemClick={setActiveContent} />
+      <Navbar
+        email={email}
+        username={username}
+        activePage={activeContent}
+        onNavItemClick={setActiveContent}
+      />
       <Box sx={{ flex: 1, padding: 3 }}>
         <Breadcrumbs
           separator={<NavigateNextIcon fontSize="small" />}

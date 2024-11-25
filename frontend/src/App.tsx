@@ -25,6 +25,7 @@ const theme = createTheme({
   palette: {
     primary: {
       main: '#087E8B',
+      dark: '#056C78',
     },
   },
 });
@@ -33,15 +34,25 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(
     () => localStorage.getItem('isAuthenticated') === 'true'
   );
+  const [email, setEmail] = useState(
+    () => localStorage.getItem('email') || null
+  );
+  const [username, setUsername] = useState(
+    () => localStorage.getItem('username') || null
+  );
 
-  const login = () => {
+  const login = (email: string, username: string) => {
     setIsAuthenticated(true);
     localStorage.setItem('isAuthenticated', 'true');
+    localStorage.setItem('email', email);
+    localStorage.setItem('username', username);
   };
 
   const logout = () => {
     setIsAuthenticated(false);
     localStorage.setItem('isAuthenticated', 'false');
+    localStorage.removeItem('email');
+    localStorage.removeItem('username');
   };
 
   return (
@@ -53,7 +64,7 @@ function App() {
             path="/"
             element={
               isAuthenticated ? (
-                <Dashboard logout={logout} />
+                <Dashboard email={email} username={username} logout={logout} />
               ) : (
                 <Navigate to="/login" replace />
               )

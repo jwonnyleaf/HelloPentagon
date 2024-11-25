@@ -27,11 +27,18 @@ import NotificationsIcon from '@mui/icons-material/Notifications';
 import SettingsIcon from '@mui/icons-material/Settings';
 
 interface NavbarProps {
+  email: string | null;
+  username: string | null;
   onNavItemClick: (contentKey: string) => void;
   activePage: string;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ onNavItemClick, activePage }) => {
+const Navbar: React.FC<NavbarProps> = ({
+  email,
+  username,
+  onNavItemClick,
+  activePage,
+}) => {
   const navItems = [
     { label: 'Overview', icon: <HomeIcon />, contentKey: 'Overview' },
     { label: 'History', icon: <HistoryIcon />, contentKey: 'History' },
@@ -43,6 +50,14 @@ const Navbar: React.FC<NavbarProps> = ({ onNavItemClick, activePage }) => {
     },
     { label: 'Settings', icon: <SettingsIcon />, contentKey: 'Settings' },
   ];
+
+  const getInitials = (name: string | null): string => {
+    if (!name) return '';
+
+    const words = name.split(' ');
+    const initials = words.map((word) => word.charAt(0).toUpperCase());
+    return initials.slice(0, 2).join('');
+  };
 
   return (
     <Drawer
@@ -160,7 +175,9 @@ const Navbar: React.FC<NavbarProps> = ({ onNavItemClick, activePage }) => {
               height: 48,
             }}
           >
-            <Typography sx={{ color: 'black', fontWeight: 700 }}>JD</Typography>
+            <Typography sx={{ color: 'black', fontWeight: 700 }}>
+              {getInitials(username)}
+            </Typography>
           </Avatar>
           <Box>
             <Typography
@@ -172,7 +189,7 @@ const Navbar: React.FC<NavbarProps> = ({ onNavItemClick, activePage }) => {
                 color: 'white',
               }}
             >
-              John Doe
+              {username}
             </Typography>
             <Typography
               variant="body2"
@@ -183,7 +200,7 @@ const Navbar: React.FC<NavbarProps> = ({ onNavItemClick, activePage }) => {
                 opacity: 0.8,
               }}
             >
-              johndoe@tamu.edu
+              {email}
             </Typography>
           </Box>
         </Box>

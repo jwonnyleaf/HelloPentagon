@@ -72,7 +72,7 @@ def upload():
         return (
             jsonify(
                 {
-                    "message": "File processed successfully.",
+                    "message": "File Processed Successfully.",
                     "prediction": {
                         "label": label,
                         "confidence": round(confidence, 2),
