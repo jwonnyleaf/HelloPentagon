@@ -32,16 +32,32 @@ const FileUpload: React.FC = () => {
       return;
     }
 
-    const formData = new FormData();
-    formData.append('file', file);
+    const username = localStorage.getItem('username');
+    if (!username) {
+      setMessage('User not logged in');
+      return;
+    }
 
     setIsUploading(true);
     try {
+      const userResponse = await fetch(`/api/user?username=${username}`);
+      const userData = await userResponse.json();
+
+      if (!userResponse.ok || !userData.user_id) {
+        setMessage(userData.error || 'Failed to fetch user information');
+        return;
+      }
+
+      const userID = userData.user_id;
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('user_id', userID);
+
+      // Submit the file to the server
       const response = await fetch('/api/upload', {
         method: 'POST',
         body: formData,
       });
-
       const data = await response.json();
       setMessage(data.message || 'Upload failed');
     } catch (error) {

@@ -5,6 +5,7 @@ import sqlite3
 from flask import Blueprint, request, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 from app.database.models.user import User
+from app.database.models.file import File
 from app.utils.extractor import BODMASFeatureExtractor, PEAttributeExtractor
 from app.utils.classifier import MalwareClassifier
 from app.utils.family import MalwareFamily
@@ -59,31 +60,50 @@ def upload():
     try:
         # Extract features from file
         file_data = file.read()
+
+        # Extract BODMAS features from file
         bodmasExtract = BODMASFeatureExtractor(file_data)
         bodmasFeatures = bodmasExtract.extract_features()
+        label, confidence = classifer.classify(bodmasFeatures)
 
         # Extract PE attributes from file
         peExtract = PEAttributeExtractor(file_data)
         peAttributes = peExtract.extract()
 
-        label, confidence = classifer.classify(bodmasFeatures)
-
         # Family Prediction
         familyExtract = MalwareFamily()
         familyResult = familyExtract.getfamily(file_data)
 
+        data = request.form or request.json
+        user_id = data.get("user_id")
+        if not user_id:
+            return jsonify({"error": "User ID is required."}), 400
+
+        new_file = File(
+            user_id=user_id,
+            file_name=file.filename,
+            prediction_label=label,
+            prediction_confidence=confidence,
+            family=familyResult,
+        )
+
+        db.session.add(new_file)
+        db.session.commit()
+
         logger.info(
-            f"[Pentagon] Prediction: {label}, Confidence: {confidence:.2f}, Family: {familyResult}"
+            f"[Pentagon] Saved file info to database: {file.filename}, File ID: {new_file.id}"
         )
 
         return (
             jsonify(
                 {
                     "message": "File Processed Successfully.",
+                    "file_id": new_file.id,
                     "prediction": {
                         "label": label,
                         "confidence": round(confidence, 2),
                     },
+                    "family": familyResult,
                 }
             ),
             200,
@@ -108,7 +128,7 @@ def signup():
 
         existing_user = User.query.filter_by(email=email).first()
         if existing_user:
-            return jsonify({"error": "Email already exists"}), 400
+            return jsonify({"error": "Email Already Exists"}), 400
 
         new_user = User(name=name, email=email, password=hashed_password)
 
@@ -151,3 +171,18 @@ def login():
 
     except Exception as e:
         return jsonify({"error": "An error occurred during login"}), 500
+
+
+@routes.route("/api/user", methods=["GET"])
+def get_user_id():
+    username = request.args.get("username")
+
+    if not username:
+        return jsonify({"error": "Username is required"}), 400
+
+    user = User.query.filter_by(name=username).first()
+
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    return jsonify({"user_id": str(user.id)}), 200

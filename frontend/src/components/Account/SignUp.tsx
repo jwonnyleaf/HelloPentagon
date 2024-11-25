@@ -13,6 +13,7 @@ import Stack from '@mui/material/Stack';
 import MuiCard from '@mui/material/Card';
 import { styled } from '@mui/material/styles';
 import { Navigate, useNavigate } from 'react-router-dom';
+import { useSnackbar } from '../../context/SnackbarProvider';
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: 'flex',
@@ -65,6 +66,7 @@ export default function SignUp() {
   const [nameErrorMessage, setNameErrorMessage] = React.useState('');
 
   const navigate = useNavigate();
+  const showSnackbar = useSnackbar();
 
   const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
   if (isAuthenticated) {
@@ -109,8 +111,8 @@ export default function SignUp() {
   };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
     if (nameError || emailError || passwordError) {
-      event.preventDefault();
       return;
     }
     const data = new FormData(event.currentTarget);
@@ -119,9 +121,12 @@ export default function SignUp() {
       const response = await axios.post('/api/signup', data, {
         headers: { 'Content-Type': 'application/json' },
       });
+      showSnackbar('Registration Successful!', 'success');
       navigate('/login');
     } catch (error) {
-      console.error('Error signing up', error);
+      showSnackbar('Registration failed. Please try again.', 'error');
+      const password = document.getElementById('password') as HTMLInputElement;
+      password.value = '';
     }
   };
 

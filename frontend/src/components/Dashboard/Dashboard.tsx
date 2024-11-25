@@ -17,14 +17,10 @@ import Alerts from '../Alerts/Alerts';
 import Settings from '../Settings/Settings';
 
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
+import { useAuth } from '../../context/AuthProvider';
 
-interface DashboardProps {
-  email: string | null;
-  username: string | null;
-  logout: () => void;
-}
-
-const Dashboard: React.FC<DashboardProps> = ({ email, username, logout }) => {
+const Dashboard: React.FC = () => {
+  const { email, username, logout } = useAuth();
   const [activeContent, setActiveContent] = useState('Overview');
   const contentMapping: Record<string, JSX.Element> = {
     Overview: <Overview onNavItemClick={setActiveContent} />,

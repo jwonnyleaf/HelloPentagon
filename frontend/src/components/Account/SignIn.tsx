@@ -13,6 +13,7 @@ import MuiCard from '@mui/material/Card';
 import { styled } from '@mui/material/styles';
 import ForgotPassword from './ForgetPassword';
 import { Navigate, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthProvider';
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: 'flex',
@@ -56,10 +57,8 @@ const SignInContainer = styled(Stack)(({ theme }) => ({
   },
 }));
 
-export default function SignIn(props: {
-  login: (email: string, username: string) => void;
-}) {
-  const { login } = props;
+const SignIn: React.FC = () => {
+  const { login } = useAuth();
   const [emailError, setEmailError] = React.useState(false);
   const [emailErrorMessage, setEmailErrorMessage] = React.useState('');
   const [passwordError, setPasswordError] = React.useState(false);
@@ -153,7 +152,7 @@ export default function SignIn(props: {
             variant="h4"
             sx={{ width: '100%', fontSize: 'clamp(2rem, 10vw, 2.15rem)' }}
           >
-            Sign in
+            Sign In
           </Typography>
           <Box
             component="form"
@@ -233,4 +232,6 @@ export default function SignIn(props: {
       </SignInContainer>
     </>
   );
-}
+};
+
+export default SignIn;
