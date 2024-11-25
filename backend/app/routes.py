@@ -7,6 +7,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from app.database.models.user import User
 from app.utils.extractor import BODMASFeatureExtractor, PEAttributeExtractor
 from app.utils.classifier import MalwareClassifier
+from app.utils.family import MalwareFamily
 from app.database.database import db
 
 
@@ -67,7 +68,13 @@ def upload():
 
         label, confidence = classifer.classify(bodmasFeatures)
 
-        logger.info(f"[Pentagon] Prediction: {label}, Confidence: {confidence:.2f}")
+        # Family Prediction
+        familyExtract = MalwareFamily()
+        familyResult = familyExtract.getfamily(file_data)
+
+        logger.info(
+            f"[Pentagon] Prediction: {label}, Confidence: {confidence:.2f}, Family: {familyResult}"
+        )
 
         return (
             jsonify(
