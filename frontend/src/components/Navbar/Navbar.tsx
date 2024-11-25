@@ -72,8 +72,10 @@ const Navbar: React.FC<NavbarProps> = ({ onNavItemClick, activePage }) => {
             onClick={() => onNavItemClick('Overview')}
             noWrap
           >
-            <ShieldIcon fontSize="large" />
-            <p className="font-rubikmono text-2xl tracking-wider">PENTAGON</p>
+            <ShieldIcon fontSize="large" color="primary" />
+            <p className="font-rubikmono text-2xl tracking-wider text-cyan">
+              PENTAGON
+            </p>
           </Typography>
         </Toolbar>
         <Divider sx={{ marginY: '8px', backgroundColor: '#ccc' }} />

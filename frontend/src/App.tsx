@@ -22,17 +22,26 @@ const theme = createTheme({
       fontSize: '1rem',
     },
   },
+  palette: {
+    primary: {
+      main: '#087E8B',
+    },
+  },
 });
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(
+    () => localStorage.getItem('isAuthenticated') === 'true'
+  );
 
   const login = () => {
     setIsAuthenticated(true);
+    localStorage.setItem('isAuthenticated', 'true');
   };
 
   const logout = () => {
     setIsAuthenticated(false);
+    localStorage.setItem('isAuthenticated', 'false');
   };
 
   return (
@@ -43,11 +52,15 @@ function App() {
           <Route
             path="/"
             element={
-              isAuthenticated ? <Dashboard /> : <Navigate to="/login" replace />
+              isAuthenticated ? (
+                <Dashboard logout={logout} />
+              ) : (
+                <Navigate to="/login" replace />
+              )
             }
           />
           {/* Login Route */}
-          <Route path="/login" element={<SignIn />} />
+          <Route path="/login" element={<SignIn login={login} />} />
           {/* Sign Up Route */}
           <Route path="/signup" element={<SignUp />} />
           <Route

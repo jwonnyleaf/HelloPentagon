@@ -3,7 +3,7 @@ import logging
 import joblib
 import sqlite3
 from flask import Blueprint, request, jsonify
-from werkzeug.security import generate_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash
 from app.database.models.user import User
 from app.utils.extractor import BODMASFeatureExtractor, PEAttributeExtractor
 from app.utils.classifier import MalwareClassifier
@@ -113,3 +113,34 @@ def signup():
     except Exception as e:
         logger.error(f"Error during registration: {str(e)}", exc_info=True)
         return jsonify({"error": "An error occurred during registration"}), 500
+
+
+@routes.route("/api/login", methods=["POST"])
+def login():
+    try:
+        data = request.json
+        email = data.get("email")
+        password = data.get("password")
+
+        # Check if the user exists
+        user = User.query.filter_by(email=email).first()
+        if not user:
+            return jsonify({"error": "Invalid email or password"}), 401
+
+        # Verify the password
+        if not check_password_hash(user.password, password):
+            return jsonify({"error": "Invalid email or password"}), 401
+
+        # If valid, return success
+        return (
+            jsonify(
+                {
+                    "message": "Login successful",
+                    "user": {"email": user.email, "name": user.name},
+                }
+            ),
+            200,
+        )
+
+    except Exception as e:
+        return jsonify({"error": "An error occurred during login"}), 500

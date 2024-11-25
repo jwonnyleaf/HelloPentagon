@@ -12,6 +12,7 @@ import Stack from '@mui/material/Stack';
 import MuiCard from '@mui/material/Card';
 import { styled } from '@mui/material/styles';
 import ForgotPassword from './ForgetPassword';
+import { Navigate, useNavigate } from 'react-router-dom';
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: 'flex',
@@ -55,12 +56,15 @@ const SignInContainer = styled(Stack)(({ theme }) => ({
   },
 }));
 
-export default function SignIn(props: { disableCustomTheme?: boolean }) {
+export default function SignIn(props: { login: () => void }) {
+  const { login } = props;
   const [emailError, setEmailError] = React.useState(false);
   const [emailErrorMessage, setEmailErrorMessage] = React.useState('');
   const [passwordError, setPasswordError] = React.useState(false);
   const [passwordErrorMessage, setPasswordErrorMessage] = React.useState('');
   const [open, setOpen] = React.useState(false);
+
+  const navigate = useNavigate();
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -70,16 +74,46 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
     setOpen(false);
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    if (emailError || passwordError) {
-      event.preventDefault();
-      return;
-    }
+  const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+  if (isAuthenticated) {
+    return <Navigate to="/" replace />;
+  }
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
     const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get('email'),
-      password: data.get('password'),
-    });
+    const email = data.get('email') as string;
+    const password = data.get('password') as string;
+
+    try {
+      const response = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      console.log(response, response.ok);
+
+      if (response.ok) {
+        const result = await response.json();
+        login();
+        navigate('/');
+      } else {
+        const error = await response.json();
+        setEmailError(true);
+        setEmailErrorMessage(error.error || 'Invalid credentials');
+
+        const password = document.getElementById(
+          'password'
+        ) as HTMLInputElement;
+        password.value = '';
+      }
+    } catch (err) {
+      console.error('Unexpected error:', err);
+      setEmailError(true);
+      setEmailErrorMessage('An unexpected error occurred. Please try again.');
+    }
   };
 
   const validateInputs = () => {
@@ -95,6 +129,15 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
     } else {
       setEmailError(false);
       setEmailErrorMessage('');
+    }
+
+    if (!password.value) {
+      setPasswordError(true);
+      setPasswordErrorMessage('Password is required.');
+      isValid = false;
+    } else {
+      setPasswordError(false);
+      setPasswordErrorMessage('');
     }
 
     return isValid;
@@ -165,7 +208,7 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
               onClick={validateInputs}
               sx={{ backgroundColor: '#087E8B', color: 'white' }}
             >
-              Sign in
+              Sign In
             </Button>
             <Link
               component="button"
@@ -182,7 +225,7 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
             <Typography sx={{ textAlign: 'center' }}>
               Don&apos;t have an account?{' '}
               <Link href="/signup" variant="body2" sx={{ alignSelf: 'center' }}>
-                Sign up
+                Sign Up
               </Link>
             </Typography>
           </Box>

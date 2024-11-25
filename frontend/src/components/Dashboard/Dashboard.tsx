@@ -18,14 +18,18 @@ import Settings from '../Settings/Settings';
 
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 
-const Dashboard: React.FC = () => {
+interface DashboardProps {
+  logout: () => void;
+}
+
+const Dashboard: React.FC<DashboardProps> = ({ logout }) => {
   const [activeContent, setActiveContent] = useState('Overview');
   const contentMapping: Record<string, JSX.Element> = {
     Overview: <Overview onNavItemClick={setActiveContent} />,
     'File Upload': <FileUpload />,
     History: <History />,
     Alerts: <Alerts />,
-    Settings: <Settings />,
+    Settings: <Settings logout={logout} />,
   };
   return (
     <Box sx={{ display: 'flex' }}>
