@@ -2,6 +2,7 @@ import os
 import logging
 import joblib
 import sqlite3
+from datetime import datetime, timedelta, timezone
 from flask import Blueprint, request, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 from app.database.models.user import User
@@ -197,17 +198,17 @@ def get_user_files(user_id):
 
         # Optional filters
         search_query = request.args.get("search", "").lower()
-        sort_by = request.args.get("sort_by", "created_at")  # Default sorting by date
-        order = request.args.get("order", "desc")  # Default order is descending
+        sort_by = request.args.get("sort_by", "created_at")
+        order = request.args.get("order", "desc")
+        last_week = request.args.get("last_week", "false").lower() == "true"
 
-        # Query user's files
         files_query = File.query.filter_by(user_id=user_id)
 
-        # Apply search filter if provided
+        if last_week:
+            one_week_ago = datetime.now(timezone.utc) - timedelta(days=7)
+            files_query = files_query.filter(File.created_at >= one_week_ago)
         if search_query:
             files_query = files_query.filter(File.file_name.ilike(f"%{search_query}%"))
-
-        # Apply sorting
         if order == "desc":
             files_query = files_query.order_by(getattr(File, sort_by).desc())
         else:
@@ -215,8 +216,6 @@ def get_user_files(user_id):
 
         # Fetch files
         files = files_query.all()
-
-        # Prepare response
         result = [
             {
                 "file_id": file.id,

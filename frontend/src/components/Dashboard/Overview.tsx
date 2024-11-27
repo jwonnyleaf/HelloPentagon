@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import {
   Box,
   Card,
@@ -6,6 +7,16 @@ import {
   Grid,
   Typography,
 } from '@mui/material';
+import { Bar } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+} from 'chart.js';
 
 import FileAnalysisCardIMG from '@assets/images/fileanalysisimage.png';
 
@@ -13,7 +24,87 @@ interface NavbarProps {
   onNavItemClick: (contentKey: string) => void;
 }
 
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip);
+
 const Overview: React.FC<NavbarProps> = ({ onNavItemClick }) => {
+  const [chartData, setChartData] = useState<any>(null);
+  const [threats, setThreats] = useState<number>(0);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch('/api/user/1/files?last_week=true');
+        const data = await response.json();
+
+        if (response.ok) {
+          setThreats(data.length);
+          const daysOfWeek = [
+            'Monday',
+            'Tuesday',
+            'Wednesday',
+            'Thursday',
+            'Friday',
+            'Saturday',
+            'Sunday',
+          ];
+          const threatCounts = Array(7).fill(0);
+          data.forEach((item: any) => {
+            const date = new Date(item.created_at);
+            const dayIndex = date.getDay();
+            threatCounts[dayIndex] += 1;
+          });
+
+          setChartData({
+            labels: daysOfWeek,
+            datasets: [
+              {
+                label: 'Threats Detected',
+                data: threatCounts,
+                backgroundColor: '#FFFFFF',
+                borderRadius: 4,
+              },
+            ],
+          });
+        } else {
+          console.error('Error fetching data:', data.error);
+        }
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const options = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: false,
+      },
+    },
+    scales: {
+      x: {
+        display: false,
+      },
+      y: {
+        display: true,
+        beginAtZero: true,
+        ticks: {
+          precision: 0,
+        },
+      },
+    },
+    barThickness: 10,
+    layout: {
+      padding: 20,
+    },
+    elements: {
+      bar: {
+        borderWidth: 0,
+      },
+    },
+  };
   return (
     <Box>
       <Grid container spacing={2}>
@@ -26,6 +117,7 @@ const Overview: React.FC<NavbarProps> = ({ onNavItemClick }) => {
               padding: '16px',
               borderRadius: '20px',
               height: '350px',
+              boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
             }}
           >
             <CardContent
@@ -66,7 +158,14 @@ const Overview: React.FC<NavbarProps> = ({ onNavItemClick }) => {
         </Grid>
 
         <Grid item xs={12} md={6} lg={5}>
-          <Card>
+          <Card
+            sx={{
+              padding: '16px',
+              borderRadius: '20px',
+              height: '350px',
+              boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
+            }}
+          >
             <CardContent>
               <Typography variant="h6">Protection Status</Typography>
               <Typography variant="body2" color="textSecondary">
@@ -88,30 +187,58 @@ const Overview: React.FC<NavbarProps> = ({ onNavItemClick }) => {
           </Card>
         </Grid>
 
-        <Grid item xs={12} md={6} lg={4}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6">Threats</Typography>
-              <Typography variant="body2" color="textSecondary">
-                (+2) than last week
-              </Typography>
+        <Grid item xs={12} md={6} lg={6}>
+          <Card
+            sx={{
+              padding: '16px',
+              borderRadius: '20px',
+              height: '500px',
+              boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
+              display: 'flex',
+              flexDirection: 'column',
+            }}
+          >
+            <CardContent
+              sx={{
+                flex: 1,
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+              }}
+            >
               <Box
                 sx={{
                   display: 'flex',
+                  flex: 1,
                   alignItems: 'center',
                   justifyContent: 'center',
-                  height: '100px',
-                  backgroundColor: '#333',
-                  borderRadius: '8px',
+                  height: '250px',
+                  backgroundColor: '#0A1128',
+                  borderRadius: '16px',
+                  padding: '16px',
+                  marginBottom: '16px',
                 }}
               >
-                Bar Chart
+                {chartData ? (
+                  <Bar data={chartData} options={options} />
+                ) : (
+                  <p>Loading...</p>
+                )}
               </Box>
+              <Typography variant="h6">Threats</Typography>
+              <Typography
+                variant="body2"
+                sx={{
+                  marginTop: 'auto',
+                }}
+                color="textSecondary"
+              >
+                <span className="font-bold text-green-500">(+{threats})</span>{' '}
+                than last week
+              </Typography>
             </CardContent>
           </Card>
         </Grid>
-
-        {/* Add more cards as needed */}
       </Grid>
     </Box>
   );

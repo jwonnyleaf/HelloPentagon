@@ -76,7 +76,7 @@ const Navbar: React.FC<NavbarProps> = ({
           display: 'flex',
           flexDirection: 'column',
           height: '100%',
-          backgroundColor: 'white',
+          backgroundColor: '#F8F9FA',
         }}
       >
         {/* Toolbar Section */}
