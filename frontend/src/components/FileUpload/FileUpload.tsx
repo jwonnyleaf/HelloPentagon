@@ -8,16 +8,18 @@ import {
   Stack,
 } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import { useAuth } from '../../context/AuthProvider';
+import { useSnackbar } from '../../context/SnackbarProvider';
 
 const FileUpload: React.FC = () => {
+  const { username } = useAuth();
+  const showSnackbar = useSnackbar();
   const [file, setFile] = useState<File | null>(null);
-  const [message, setMessage] = useState('');
   const [isUploading, setIsUploading] = useState(false);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     if (acceptedFiles.length > 0) {
       setFile(acceptedFiles[0]);
-      setMessage('');
     }
   }, []);
 
@@ -28,13 +30,11 @@ const FileUpload: React.FC = () => {
 
   const handleSubmit = async () => {
     if (!file) {
-      setMessage('No file selected');
+      showSnackbar('No File Uploaded', 'error');
       return;
     }
 
-    const username = localStorage.getItem('username');
     if (!username) {
-      setMessage('User not logged in');
       return;
     }
 
@@ -44,7 +44,7 @@ const FileUpload: React.FC = () => {
       const userData = await userResponse.json();
 
       if (!userResponse.ok || !userData.user_id) {
-        setMessage(userData.error || 'Failed to fetch user information');
+        showSnackbar('Error Uploading File', 'error');
         return;
       }
 
@@ -53,16 +53,20 @@ const FileUpload: React.FC = () => {
       formData.append('file', file);
       formData.append('user_id', userID);
 
-      // Submit the file to the server
       const response = await fetch('/api/upload', {
         method: 'POST',
         body: formData,
       });
       const data = await response.json();
-      setMessage(data.message || 'Upload failed');
+      if (response.ok) {
+        showSnackbar(data.message, 'success');
+      } else {
+        showSnackbar(data.message, 'error');
+      }
+
+      setFile(null);
     } catch (error) {
-      console.error('Error uploading file', error);
-      setMessage('Error uploading file');
+      showSnackbar('Error Uploading File', 'error');
     } finally {
       setIsUploading(false);
     }
@@ -139,19 +143,6 @@ const FileUpload: React.FC = () => {
             'Upload'
           )}
         </Button>
-
-        {/* Optional: Message */}
-        {message && (
-          <Typography
-            variant="body2"
-            sx={{
-              color: message.includes('Error') ? '#ff4d4d' : '#28a745',
-              marginTop: 2,
-            }}
-          >
-            {message}
-          </Typography>
-        )}
       </Stack>
 
       {/* Footer Text */}

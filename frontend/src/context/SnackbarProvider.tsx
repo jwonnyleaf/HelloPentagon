@@ -40,7 +40,7 @@ export const SnackbarProvider: React.FC<{ children: React.ReactNode }> = ({
           sx={{
             width: '100%',
             maxWidth: '400px',
-            fontSize: '1.2rem',
+            fontSize: '1.4rem',
             padding: '1rem',
           }}
         >

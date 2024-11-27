@@ -96,7 +96,7 @@ const SignIn: React.FC = () => {
 
       if (response.ok) {
         const result = await response.json();
-        login(result.user['email'], result.user['name']);
+        login(result.user['id'], result.user['email'], result.user['name']);
         navigate('/');
       } else {
         const error = await response.json();

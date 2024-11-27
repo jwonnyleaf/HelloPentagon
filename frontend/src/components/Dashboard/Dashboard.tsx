@@ -20,14 +20,14 @@ import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import { useAuth } from '../../context/AuthProvider';
 
 const Dashboard: React.FC = () => {
-  const { email, username, logout } = useAuth();
+  const { email, username } = useAuth();
   const [activeContent, setActiveContent] = useState('Overview');
   const contentMapping: Record<string, JSX.Element> = {
     Overview: <Overview onNavItemClick={setActiveContent} />,
     'File Upload': <FileUpload />,
     History: <History />,
     Alerts: <Alerts />,
-    Settings: <Settings logout={logout} />,
+    Settings: <Settings />,
   };
   return (
     <Box sx={{ display: 'flex' }}>

@@ -149,21 +149,20 @@ def login():
         email = data.get("email")
         password = data.get("password")
 
-        # Check if the user exists
+        # Validate User Exists in Database
         user = User.query.filter_by(email=email).first()
         if not user:
             return jsonify({"error": "Invalid email or password"}), 401
 
-        # Verify the password
+        # Validate Password
         if not check_password_hash(user.password, password):
             return jsonify({"error": "Invalid email or password"}), 401
 
-        # If valid, return success
         return (
             jsonify(
                 {
                     "message": "Login successful",
-                    "user": {"email": user.email, "name": user.name},
+                    "user": {"id": user.id, "email": user.email, "name": user.name},
                 }
             ),
             200,
@@ -186,3 +185,51 @@ def get_user_id():
         return jsonify({"error": "User not found"}), 404
 
     return jsonify({"user_id": str(user.id)}), 200
+
+
+@routes.route("/api/user/<int:user_id>/files", methods=["GET"])
+def get_user_files(user_id):
+    try:
+        # Validate the user exists
+        user = User.query.get(user_id)
+        if not user:
+            return jsonify({"error": "User not found"}), 404
+
+        # Optional filters
+        search_query = request.args.get("search", "").lower()
+        sort_by = request.args.get("sort_by", "created_at")  # Default sorting by date
+        order = request.args.get("order", "desc")  # Default order is descending
+
+        # Query user's files
+        files_query = File.query.filter_by(user_id=user_id)
+
+        # Apply search filter if provided
+        if search_query:
+            files_query = files_query.filter(File.file_name.ilike(f"%{search_query}%"))
+
+        # Apply sorting
+        if order == "desc":
+            files_query = files_query.order_by(getattr(File, sort_by).desc())
+        else:
+            files_query = files_query.order_by(getattr(File, sort_by).asc())
+
+        # Fetch files
+        files = files_query.all()
+
+        # Prepare response
+        result = [
+            {
+                "file_id": file.id,
+                "file_name": file.file_name,
+                "prediction_label": file.prediction_label,
+                "prediction_confidence": file.prediction_confidence,
+                "family": file.family,
+                "created_at": file.created_at,
+            }
+            for file in files
+        ]
+
+        return jsonify(result), 200
+    except Exception as e:
+        logger.error(f"Error fetching user files: {str(e)}", exc_info=True)
+        return jsonify({"error": "Internal server error"}), 500
