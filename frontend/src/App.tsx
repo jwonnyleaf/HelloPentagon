@@ -11,6 +11,7 @@ import { SnackbarProvider } from './context/SnackbarProvider';
 import Dashboard from './components/Dashboard/Dashboard';
 import SignIn from './components/Account/SignIn';
 import SignUp from './components/Account/SignUp';
+import Results from './components/FileUpload/Results';
 import { AuthProvider } from './context/AuthProvider';
 import ProtectedRoute from './routes/ProtectedRoute';
 
@@ -45,6 +46,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <Dashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/file/:fileID"
+                element={
+                  <ProtectedRoute>
+                    <Results />
                   </ProtectedRoute>
                 }
               />

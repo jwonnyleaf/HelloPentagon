@@ -10,10 +10,15 @@ import {
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { useAuth } from '../../context/AuthProvider';
 import { useSnackbar } from '../../context/SnackbarProvider';
+import { useNavigate } from 'react-router-dom';
 
 const FileUpload: React.FC = () => {
+  // Providers
   const { username } = useAuth();
   const showSnackbar = useSnackbar();
+  const navigate = useNavigate();
+
+  // States
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
 
@@ -60,6 +65,7 @@ const FileUpload: React.FC = () => {
       const data = await response.json();
       if (response.ok) {
         showSnackbar(data.message, 'success');
+        navigate(`/file/${data.file_id}`);
       } else {
         showSnackbar(data.message, 'error');
       }

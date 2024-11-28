@@ -80,6 +80,9 @@ def upload():
         if not user_id:
             return jsonify({"error": "User ID is required."}), 400
 
+        if label == "Goodware":
+            familyResult = "N/A"
+
         new_file = File(
             user_id=user_id,
             file_name=file.filename,
@@ -231,4 +234,33 @@ def get_user_files(user_id):
         return jsonify(result), 200
     except Exception as e:
         logger.error(f"Error fetching user files: {str(e)}", exc_info=True)
+        return jsonify({"error": "Internal server error"}), 500
+
+
+@routes.route("/api/file/<string:file_id>", methods=["GET"])
+def get_file_details(file_id):
+    """
+    Fetch detailed information about a specific file.
+    """
+    try:
+        # Fetch the file from the database
+        file = File.query.filter_by(id=file_id).first()
+        if not file:
+            return jsonify({"error": "File not found"}), 404
+
+        # Construct response data
+        result = {
+            "file_id": file.id,
+            "file_name": file.file_name,
+            "prediction_label": file.prediction_label,
+            "prediction_confidence": round(file.prediction_confidence * 100, 2),
+            "family": file.family,
+            "created_at": file.created_at.isoformat(),
+            "user_id": file.user_id,
+        }
+
+        return jsonify(result), 200
+
+    except Exception as e:
+        logger.error(f"Error fetching file details: {str(e)}", exc_info=True)
         return jsonify({"error": "Internal server error"}), 500

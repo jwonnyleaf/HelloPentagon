@@ -5,6 +5,8 @@ node_modules
 
 __pycache__
 
+.env
+
 # Backend #
 test/
 backend/app/database/pentagon.db

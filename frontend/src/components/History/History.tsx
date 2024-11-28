@@ -10,6 +10,7 @@ import { DataGrid, GridColDef, GridPaginationModel } from '@mui/x-data-grid';
 import SearchIcon from '@mui/icons-material/Search';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { useAuth } from '../../context/AuthProvider';
+import { useNavigate } from 'react-router-dom';
 
 interface FileRecord {
   file_id: string;
@@ -28,8 +29,9 @@ const HistoryPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
     page: 0,
-    pageSize: 10,
+    pageSize: 20,
   });
+  const navigate = useNavigate();
 
   const fetchFiles = async () => {
     setLoading(true);
@@ -58,8 +60,8 @@ const HistoryPage: React.FC = () => {
     fetchFiles();
   }, [searchQuery, paginationModel]);
 
-  const handleViewFile = (fileId: string) => {
-    // navigate(`/file/${fileId}`);
+  const handleViewFile = (fileID: string) => {
+    navigate(`/file/${fileID}`);
   };
 
   const columns: GridColDef[] = [
@@ -91,11 +93,15 @@ const HistoryPage: React.FC = () => {
     {
       field: 'prediction_confidence',
       headerName: 'Confidence',
-      flex: 1,
+      flex: 0.5,
+      minWidth: 100,
+      resizable: false,
+      headerClassName: 'center-header',
+      cellClassName: 'confidence-cell',
       renderCell: (params) => `${(params.value * 100).toFixed(2)}%`,
     },
     {
-      field: 'view',
+      field: 'View',
       headerName: '',
       sortable: false,
       flex: 0.5,
@@ -185,6 +191,12 @@ const HistoryPage: React.FC = () => {
               fontSize: '1.25rem',
               '& .MuiDataGrid-columnHeaderTitle': {
                 fontWeight: 'bold',
+              },
+              '& .center-header': {
+                textAlign: 'center',
+              },
+              '& .confidence-cell': {
+                textAlign: 'center',
               },
             }}
           />

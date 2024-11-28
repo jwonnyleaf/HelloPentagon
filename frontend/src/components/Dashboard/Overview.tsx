@@ -17,6 +17,8 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
+import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
+import 'react-circular-progressbar/dist/styles.css';
 
 import FileAnalysisCardIMG from '@assets/images/fileanalysisimage.png';
 
@@ -160,29 +162,45 @@ const Overview: React.FC<NavbarProps> = ({ onNavItemClick }) => {
         <Grid item xs={12} md={6} lg={5}>
           <Card
             sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              alignItems: 'center',
               padding: '16px',
               borderRadius: '20px',
               height: '350px',
               boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
             }}
           >
-            <CardContent>
-              <Typography variant="h6">Protection Status</Typography>
-              <Typography variant="body2" color="textSecondary">
-                Average protection: 75%
-              </Typography>
-              <Box
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  height: '100px',
-                  backgroundColor: '#f5f5f5',
-                  borderRadius: '8px',
-                }}
-              >
-                Circular Progress
-              </Box>
+            <CardContent
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
+              <h3 style={{ marginBottom: '16px', color: '#555' }}>
+                Protection Status
+              </h3>
+              <div style={{ width: '150px', marginBottom: '16px' }}>
+                <CircularProgressbar
+                  value={75}
+                  text={`${75}%`}
+                  counterClockwise={true}
+                  styles={buildStyles({
+                    textColor: '#333',
+                    pathColor: '#FFA726',
+                    trailColor: '#ddd',
+                  })}
+                />
+              </div>
+              <h4 style={{ margin: '8px 0', color: '#000' }}>
+                Average protection
+              </h4>
+              <p style={{ fontSize: '14px', color: '#888' }}>
+                Check what you can do to be fully protected
+              </p>
             </CardContent>
           </Card>
         </Grid>
