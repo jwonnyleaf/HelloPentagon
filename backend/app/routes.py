@@ -2,15 +2,21 @@ import os
 import logging
 import joblib
 import sqlite3
+from dotenv import load_dotenv
 from datetime import datetime, timedelta, timezone
 from flask import Blueprint, request, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
+from openai import OpenAI
 from app.database.models.user import User
 from app.database.models.file import File
 from app.utils.extractor import BODMASFeatureExtractor, PEAttributeExtractor
 from app.utils.classifier import MalwareClassifier
 from app.utils.family import MalwareFamily
 from app.database.database import db
+
+
+env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env")
+load_dotenv(env_path)
 
 
 class ColorFormatter(logging.Formatter):
@@ -40,7 +46,10 @@ for handler in logger.handlers:
 
 routes = Blueprint("routes", __name__)
 
-# Initial Malware Classifier
+# Initialize OpenAI API
+openAIClient = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+# Initialize Malware Classifier
 classifer = MalwareClassifier()
 logger.info(f"{len(classifer.model)} models loaded successfully.")
 
@@ -264,3 +273,51 @@ def get_file_details(file_id):
     except Exception as e:
         logger.error(f"Error fetching file details: {str(e)}", exc_info=True)
         return jsonify({"error": "Internal server error"}), 500
+
+
+@routes.route("/api/chat", methods=["POST"])
+def chat():
+    """
+    Handle chat queries and provide AI-based responses with malware context.
+    """
+    try:
+        data = request.json
+        query = data.get("query")
+        malware_details = data.get("malwareDetails", {})
+
+        if not query:
+            return jsonify({"error": "Query is required."}), 400
+
+        messages = [
+            {
+                "role": "system",
+                "content": f"""You are a cybersecurity specialist who is discussing a malware incident with a client.
+                The client has provided you with the following email about the malware:
+                I ran malware analysis software on a file and received the following results:
+                    - **Confidence Score**: {malware_details.get("confidence", 0)}
+                    - **Detection Status**: {malware_details.get("label", "Unknown")}
+                    - **Malware Family Type**: {malware_details.get("family", "Unknown")}
+
+                Based on this analysis:
+                1. Provide a clear recommendation on how to handle the file (e.g., quarantine, delete, or ignore).
+                2. Justify your recommendation by explaining the reasoning behind it.
+                3. If applicable, include any additional precautions or steps the user should take to mitigate risks.
+
+                Ensure the recommendations are actionable and concise, tailored to the detected malware characteristics.""",
+            },
+            {"role": "user", "content": query},
+        ]
+
+        response = openAIClient.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=messages,
+            max_tokens=1500,
+            temperature=0.7,
+        )
+
+        ai_response = response.choices[0].message.content.strip()
+        return jsonify({"response": ai_response}), 200
+
+    except Exception as e:
+        logger.error(f"Error in /api/chat: {str(e)}", exc_info=True)
+        return jsonify({"error": "Failed to process the chat request."}), 500

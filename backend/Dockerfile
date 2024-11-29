@@ -17,9 +17,14 @@ RUN mkdir -p $MAMBA_ROOT_PREFIX/pkgs && \
 
 # Install dependencies
 COPY requirements_conda.txt .
+COPY .env .
 RUN micromamba install -y -n base --channel conda-forge --file requirements_conda.txt && \
-    micromamba install -y -n base --channel conda-forge python scikit-learn==1.5.2 numpy=1.19 pandas==1.3.5 xgboost lightgbm pefile flask flask-cors sqlalchemy Flask-SQLAlchemy Werkzeug && \
+    micromamba install -y -n base --channel conda-forge python scikit-learn==1.5.2 numpy=1.19 pandas==1.3.5 xgboost lightgbm pefile flask flask-cors sqlalchemy Flask-SQLAlchemy Werkzeug python-dotenv && \
     micromamba clean --all --yes
+
+# Install problematic dependencies using pip
+RUN /opt/mamba/bin/python -m pip install --upgrade pip && \
+    /opt/mamba/bin/python -m pip install openai==1.55.3 jitter>=0.4.0
 
 # Copy all EMBER files
 COPY ./ember_lib /ember
