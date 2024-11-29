@@ -10,6 +10,7 @@ import {
   Divider,
   Button,
   TextField,
+  Avatar,
 } from '@mui/material';
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
@@ -403,30 +404,40 @@ const ResultsPage: React.FC = () => {
             <Box
               key={index}
               sx={{
-                textAlign: msg.sender === 'user' ? 'right' : 'left',
-                marginBottom: 1,
+                display: 'flex',
+                flexDirection: msg.sender === 'user' ? 'row-reverse' : 'row',
+                alignItems: 'center',
+                gap: 1,
+                marginBottom: 2,
               }}
             >
-              <Box
+              <Avatar
                 sx={{
+                  bgcolor: msg.sender === 'user' ? '#087E8B' : '#f5f5f5',
+                  color: msg.sender === 'user' ? '#fff' : '#000',
+                }}
+              >
+                {msg.sender === 'user' ? 'U' : 'AI'}
+              </Avatar>
+
+              <Typography
+                variant="body1"
+                sx={{
+                  display: 'inline-block',
                   padding: 2,
                   borderRadius: 2,
-                  backgroundColor:
+                  background:
                     msg.sender === 'user'
-                      ? 'linear-gradient(to right, #4facfe, #00f2fe)'
-                      : '#f5f5f5',
+                      ? 'linear-gradient(to right top, #087e8b, #1c7c87, #287a84, #307880, #37767d)'
+                      : '#eeeeee',
                   color: msg.sender === 'user' ? '#fff' : '#000',
-                  maxWidth: '75%',
+                  maxWidth: '80%',
+                  wordWrap: 'break-word',
                   boxShadow: '0px 3px 6px rgba(0,0,0,0.1)',
                 }}
               >
-                <Typography variant="body1" component="div">
-                  <ReactMarkdown>{msg.message}</ReactMarkdown>
-                </Typography>
-                <Typography variant="caption" align="right">
-                  {new Date().toLocaleTimeString()}
-                </Typography>
-              </Box>
+                {msg.message}
+              </Typography>
             </Box>
           ))}
         </Box>
