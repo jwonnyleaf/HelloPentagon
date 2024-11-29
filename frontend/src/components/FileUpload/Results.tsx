@@ -85,7 +85,8 @@ const ResultsPage: React.FC = () => {
     }
   };
 
-  const handleSendMessage = async () => {
+  const handleSendMessage = async (event?: React.FormEvent) => {
+    if (event) event.preventDefault();
     if (!chatInput.trim()) return;
 
     const userMessage = chatInput.trim();
@@ -345,26 +346,13 @@ const ResultsPage: React.FC = () => {
           <Typography variant="h5" gutterBottom>
             Recommendation
           </Typography>
-          {loadingChat ? (
-            <Box
-              sx={{
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                height: '100px',
-              }}
-            >
-              <CircularProgress />
-            </Box>
-          ) : (
-            <Box>
-              <Typography variant="body1" component="div">
-                <ReactMarkdown>
-                  {recommendationResponse || 'No recommendation available yet.'}
-                </ReactMarkdown>
-              </Typography>
-            </Box>
-          )}
+          <Box>
+            <Typography variant="body1" component="div">
+              <ReactMarkdown>
+                {recommendationResponse || 'Recommendation loading...'}
+              </ReactMarkdown>
+            </Typography>
+          </Box>
         </Paper>
 
         <Divider sx={{ marginY: 3 }} />
@@ -441,7 +429,7 @@ const ResultsPage: React.FC = () => {
             </Box>
           ))}
         </Box>
-        <Box sx={{ display: 'flex' }}>
+        <Box component="form" sx={{ display: 'flex' }}>
           <TextField
             fullWidth
             variant="outlined"
@@ -451,6 +439,7 @@ const ResultsPage: React.FC = () => {
             disabled={loadingChat}
           />
           <Button
+            type="submit"
             variant="contained"
             color="primary"
             onClick={handleSendMessage}
