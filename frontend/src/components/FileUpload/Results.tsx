@@ -101,6 +101,7 @@ const ResultsPage: React.FC = () => {
     try {
       const payload = {
         query: userMessage,
+        chatHistory: chatMessages,
         malwareDetails: {
           confidence: fileDetails?.prediction_confidence || 0,
           label: fileDetails?.prediction_label || 'Unknown',
@@ -424,7 +425,9 @@ const ResultsPage: React.FC = () => {
                   boxShadow: '0px 3px 6px rgba(0,0,0,0.1)',
                 }}
               >
-                {msg.message}
+                <ReactMarkdown rehypePlugins={[rehypeRaw]}>
+                  {msg.message}
+                </ReactMarkdown>
               </Typography>
             </Box>
           ))}

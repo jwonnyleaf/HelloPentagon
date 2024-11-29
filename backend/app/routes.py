@@ -283,6 +283,7 @@ def chat():
     try:
         data = request.json
         query = data.get("query")
+        chat_history = data.get("chatHistory", [])
         malware_details = data.get("malwareDetails", {})
 
         if not query:
@@ -305,13 +306,22 @@ def chat():
 
                 Ensure the recommendations are actionable and concise, tailored to the detected malware characteristics.""",
             },
-            {"role": "user", "content": query},
         ]
+
+        for message in chat_history:
+            messages.append(
+                {
+                    "role": "user" if message["sender"] == "user" else "system",
+                    "content": message["message"],
+                }
+            )
+
+        messages.append({"role": "user", "content": query})
 
         response = openAIClient.chat.completions.create(
             model="gpt-4o-mini",
             messages=messages,
-            max_tokens=1500,
+            max_tokens=750,
             temperature=0.7,
         )
 
