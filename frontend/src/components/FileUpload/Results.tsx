@@ -23,6 +23,7 @@ const ResultsPage: React.FC = () => {
     { sender: string; message: string }[]
   >([]);
   const [chatInput, setChatInput] = useState('');
+  const [loadingRecommendation, setLoadingRecommendation] = useState(false);
   const [loadingChat, setLoadingChat] = useState(false);
   const chatBoxRef = useRef<HTMLDivElement>(null);
 
@@ -48,9 +49,9 @@ const ResultsPage: React.FC = () => {
   };
 
   const queryInitialRecommendation = async () => {
-    if (!fileDetails || recommendationFetched || loadingChat) return;
+    if (!fileDetails || recommendationFetched || loadingRecommendation) return;
 
-    setLoadingChat(true);
+    setLoadingRecommendation(true);
     try {
       const payload = {
         query: 'What recommendations do you have based on this analysis?',
@@ -81,7 +82,7 @@ const ResultsPage: React.FC = () => {
         'An error occurred while fetching the recommendation.'
       );
     } finally {
-      setLoadingChat(false);
+      setLoadingRecommendation(false);
     }
   };
 
@@ -431,6 +432,22 @@ const ResultsPage: React.FC = () => {
               </Typography>
             </Box>
           ))}
+
+          {loadingChat && (
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
+                marginTop: 2,
+              }}
+            >
+              <CircularProgress size={16} />
+              <Typography variant="caption" color="textSecondary">
+                AI is typing...
+              </Typography>
+            </Box>
+          )}
         </Box>
         <Box component="form" sx={{ display: 'flex' }}>
           <TextField
@@ -449,7 +466,7 @@ const ResultsPage: React.FC = () => {
             disabled={loadingChat}
             sx={{ marginLeft: 2 }}
           >
-            {loadingChat ? <CircularProgress size={20} /> : 'Send'}
+            {loadingChat ? <></> : 'Send'}
           </Button>
         </Box>
       </Paper>
