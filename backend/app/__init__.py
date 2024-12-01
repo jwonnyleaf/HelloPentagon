@@ -6,11 +6,14 @@ from sqlalchemy import text
 
 from app.routes import routes
 from app.database.database import db
+from app.socketio import socketio
 
 
 def create_app():
     app = Flask(__name__)
     CORS(app)
+
+    socketio.init_app(app)
 
     BASE_DIR = os.path.abspath(os.path.dirname(__file__))
     DATABASE_PATH = os.path.join(BASE_DIR, "database/pentagon.db")

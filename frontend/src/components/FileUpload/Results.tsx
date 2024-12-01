@@ -40,16 +40,6 @@ const ResultsPage: React.FC = () => {
     string | null
   >(null);
 
-  const tempStr =
-    'Based on the analysis provided, here are my recommendations: 1. **Recommendation**: Quarantine the File - **Justification**: The file has a confidence score of 75.96, indicating a significant likelihood of being malicious. The detection status "Needs Attention" suggests that the file poses a potential threat. Additionally, the malware family type is identified as a "backdoor," which is particularly concerning as it can allow unauthorized access to your system. 2. **Additional Precautions**: - **Conduct a Full System Scan**: Use updated antivirus or anti-malware software to perform a comprehensive scan of your system to detect any other potentially malicious files or activities. - **Update Security Software**: Ensure that your antivirus and anti-malware software are up-to-date with the latest definitions to improve detection and prevention capabilities. - **Review System Logs**: Check system and network logs for any unusual activity that might indicate that the backdoor has been exploited. - **Change Passwords**: As a precaution, change passwords for any accounts that might have been accessed from the affected system. - **Backup Important Data**: Regularly back up important files to an external drive or secure cloud storage to prevent data loss in case of further infection or attack. - **Educate Users**: Remind all users of the importance of not downloading or executing unknown files and to be cautious of email attachments and links from unknown sources. These steps will help mitigate the risk and protect your system from potential exploitation by the detected backdoor malware.';
-
-  const formatAPIResponse = (response: string) => {
-    let formattedResponse = response.replace(/- /g, '\n  * ');
-    formattedResponse = formattedResponse.replace(/(\d\.)\s/g, '\n$1 ');
-    console.log(formattedResponse);
-    return formattedResponse;
-  };
-
   const queryInitialRecommendation = async () => {
     if (!fileDetails || recommendationFetched || loadingRecommendation) return;
 
@@ -158,7 +148,6 @@ const ResultsPage: React.FC = () => {
   useEffect(() => {
     const fetchFileDetails = async () => {
       try {
-        console.log({ fileID });
         setLoading(true);
         const response = await fetch(`/api/file/${fileID}`);
         const data = await response.json();

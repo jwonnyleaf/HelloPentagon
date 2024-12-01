@@ -4,15 +4,18 @@ import joblib
 import sqlite3
 from dotenv import load_dotenv
 from datetime import datetime, timedelta, timezone
-from flask import Blueprint, request, jsonify
+from threading import Timer
+from flask import Blueprint, request, jsonify, current_app
 from werkzeug.security import generate_password_hash, check_password_hash
 from openai import OpenAI
 from app.database.models.user import User
 from app.database.models.file import File
+from app.database.models.notification import Notification
 from app.utils.extractor import BODMASFeatureExtractor, PEAttributeExtractor
 from app.utils.classifier import MalwareClassifier
 from app.utils.family import MalwareFamily
 from app.database.database import db
+from app.socketio import socketio
 
 
 env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env")
@@ -36,7 +39,7 @@ class ColorFormatter(logging.Formatter):
 
 
 logging.basicConfig(
-    level=logging.DEBUG,
+    level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
     handlers=[logging.StreamHandler()],
 )
@@ -52,6 +55,12 @@ openAIClient = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 # Initialize Malware Classifier
 classifer = MalwareClassifier()
 logger.info(f"{len(classifer.model)} models loaded successfully.")
+
+
+@socketio.on("connect")
+def handle_connect():
+    sid = request.sid
+    logger.info(f"Client connected to the WebSocket. SID: {sid}")
 
 
 @routes.route("/api/upload", methods=["POST"])
@@ -107,6 +116,10 @@ def upload():
             f"[Pentagon] Saved file info to database: {file.filename}, File ID: {new_file.id}"
         )
 
+        if label == "Malware":
+            logger.info(f"[Pentagon] Scheduling Alert Timer for File ID {new_file.id}.")
+            schedule_alert_timer(new_file.user_id, new_file.id, new_file.file_name)
+
         return (
             jsonify(
                 {
@@ -124,6 +137,53 @@ def upload():
     except Exception as e:
         logger.error(f"Error during processing: {str(e)}", exc_info=True)
         return jsonify({"error": "Internal server error."}), 500
+
+
+def schedule_alert_timer(user_id, file_id, file_name):
+    """
+    Schedule a malware alert notification after 30 seconds.
+    """
+    app = current_app._get_current_object()
+
+    def create_alert():
+        try:
+            logger.info(f"Timer triggered for File ID {file_id}, creating alert...")
+            with app.app_context():
+
+                existing_alert = Notification.query.filter_by(
+                    user_id=user_id, file_id=file_id
+                ).first()
+                if existing_alert:
+                    logger.info(
+                        f"Alert already exists for File ID {file_id}, skipping creation."
+                    )
+                    return
+
+                alert = Notification(
+                    user_id=user_id,
+                    file_id=file_id,
+                    file_name=file_name,
+                    title="Malware Detected",
+                    message=f"A malware was detected in the file '{file_name}'. Please review and take action.",
+                )
+                db.session.add(alert)
+                db.session.commit()
+
+                socketio.emit(
+                    "new_alert",
+                    {
+                        "file_name": file_name,
+                    },
+                )
+                logger.info(f"Malware Alert created and emitted for File ID {file_id}.")
+        except Exception as e:
+            logger.error(
+                f"Error creating alert for File ID {file_id}: {str(e)}",
+                exc_info=True,
+            )
+
+    logger.info(f"Starting Timer for File ID {file_id}.")
+    Timer(30.0, create_alert).start()
 
 
 @routes.route("/api/register", methods=["POST"])
@@ -377,3 +437,54 @@ def set_level():
     except Exception as e:
         print(f"Error in /api/set-level: {e}")
         return jsonify({"error": "An error occurred while updating the level."}), 500
+
+
+@routes.route("/api/notifications/<int:user_id>", methods=["GET"])
+def get_notifications(user_id):
+    """
+    Fetch active notifications for a user.
+    """
+    try:
+        notifications = Notification.query.filter_by(
+            user_id=user_id, is_dismissed=False
+        ).all()
+        return (
+            jsonify(
+                [
+                    {
+                        "id": n.id,
+                        "file_id": n.file_id,
+                        "file_name": n.file_name,
+                        "title": n.title,
+                        "message": n.message,
+                        "created_at": n.created_at,
+                    }
+                    for n in notifications
+                ]
+            ),
+            200,
+        )
+    except Exception as e:
+        logger.error(f"Error fetching notifications: {str(e)}", exc_info=True)
+        return jsonify({"error": "An error occurred while fetching notifications"}), 500
+
+
+@routes.route("/api/notifications/<int:notification_id>/dismiss", methods=["PUT"])
+def dismiss_notification(notification_id):
+    """
+    Dismiss a notification by its ID.
+    """
+    try:
+        notification = Notification.query.get(notification_id)
+        if not notification:
+            return jsonify({"error": "Notification not found"}), 404
+
+        notification.is_dismissed = True
+        db.session.commit()
+        return jsonify({"message": "Notification dismissed successfully"}), 200
+    except Exception as e:
+        print(f"Error dismissing notification: {e}")
+        return (
+            jsonify({"error": "An error occurred while dismissing the notification"}),
+            500,
+        )

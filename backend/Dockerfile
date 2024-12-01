@@ -24,7 +24,7 @@ RUN micromamba install -y -n base --channel conda-forge --file requirements_cond
 
 # Install problematic dependencies using pip
 RUN /opt/mamba/bin/python -m pip install --upgrade pip && \
-    /opt/mamba/bin/python -m pip install openai==1.55.3 jitter>=0.4.0
+    /opt/mamba/bin/python -m pip install openai==1.55.3 jitter>=0.4.0 flask-socketio eventlet
 
 # Copy all EMBER files
 COPY ./ember_lib /ember

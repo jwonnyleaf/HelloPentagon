@@ -12,7 +12,7 @@ import {
   Button,
 } from '@mui/material';
 import Navbar from '../Navbar/Navbar';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 // Import Pages
 import Overview from './Overview';
@@ -24,11 +24,12 @@ import Settings from '../Settings/Settings';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import { useAuth } from '../../context/AuthProvider';
 import { useSnackbar } from '../../context/SnackbarProvider';
+import { useSocket } from '../../context/SocketProvider';
 
 const Dashboard: React.FC = () => {
   const { userID, email, username, level, setLevel } = useAuth();
-  const setup = level === null;
   const showSnackbar = useSnackbar();
+  const setup = level === null;
   const [activeContent, setActiveContent] = useState('Overview');
   const [selectedLevel, setSelectedLevel] = useState('');
   const [openDialog, setOpenDialog] = useState(setup);
