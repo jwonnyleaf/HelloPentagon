@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Typography, Paper, Button } from '@mui/material';
+import { Box, Typography, Paper, Button, Stack } from '@mui/material';
 import { useAuth } from '../../context/AuthProvider';
+import { useSocket } from '../../context/SocketProvider';
 
 type Alert = {
   id: number;
@@ -13,6 +14,7 @@ type Alert = {
 
 const Alerts: React.FC = () => {
   const { userID } = useAuth();
+  const socket = useSocket();
   const [alerts, setAlerts] = useState<Alert[]>([]);
 
   const fetchAlerts = async () => {
@@ -36,6 +38,8 @@ const Alerts: React.FC = () => {
     try {
       await fetch(`/api/notifications/${alertID}/dismiss`, { method: 'PUT' });
       fetchAlerts();
+      console.log('Alert dismissed');
+      socket.emit('update_alerts');
     } catch (error) {
       console.error('Error dismissing alert:', error);
     }
@@ -46,29 +50,78 @@ const Alerts: React.FC = () => {
   }, []);
 
   return (
-    <Box>
-      <Typography variant="h4" gutterBottom>
+    <Box sx={{ padding: 3 }}>
+      <Typography
+        variant="h4"
+        gutterBottom
+        sx={{
+          marginBottom: 4,
+          fontWeight: 'bold',
+        }}
+      >
         Alerts
       </Typography>
       {alerts.length === 0 ? (
-        <Typography>No active alerts</Typography>
+        <Typography
+          sx={{
+            textAlign: 'center',
+            fontSize: '1.2rem',
+            color: 'gray',
+            marginTop: 4,
+          }}
+        >
+          No active alerts at the moment.
+        </Typography>
       ) : (
-        alerts.map((alert) => (
-          <Paper key={alert.id} sx={{ padding: 2, marginBottom: 2 }}>
-            <Typography variant="h6">{alert.title}</Typography>
-            <Typography variant="body1">{alert.message}</Typography>
-            <Typography variant="body2" color="textSecondary">
-              File: {alert.file_name} (ID: {alert.file_id})
-            </Typography>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={() => dismissAlert(alert.id)}
+        <Stack spacing={3}>
+          {alerts.map((alert) => (
+            <Paper
+              key={alert.id}
+              elevation={3}
+              sx={{
+                padding: 3,
+                borderRadius: '16px',
+                backgroundColor: '#f9f9f9',
+                boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
+              }}
             >
-              Dismiss
-            </Button>
-          </Paper>
-        ))
+              <Typography
+                variant="h6"
+                sx={{ fontWeight: 'bold', marginBottom: 2, color: '#087E8B' }}
+              >
+                {alert.title}
+              </Typography>
+              <Typography
+                variant="body1"
+                sx={{ marginBottom: 2, lineHeight: 1.6 }}
+              >
+                {alert.message}
+              </Typography>
+              <Typography
+                variant="body2"
+                color="textSecondary"
+                sx={{ marginBottom: 3 }}
+              >
+                File: <strong>{alert.file_name}</strong> (ID: {alert.file_id})
+              </Typography>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => dismissAlert(alert.id)}
+                sx={{
+                  backgroundColor: '#087E8B',
+                  ':hover': {
+                    backgroundColor: '#065a60',
+                  },
+                  textTransform: 'capitalize',
+                  fontWeight: 'bold',
+                }}
+              >
+                Dismiss
+              </Button>
+            </Paper>
+          ))}
+        </Stack>
       )}
     </Box>
   );

@@ -42,11 +42,11 @@ const ResultsPage: React.FC = () => {
 
   const queryInitialRecommendation = async () => {
     if (!fileDetails || recommendationFetched || loadingRecommendation) return;
-
     setLoadingRecommendation(true);
     try {
       const payload = {
         query: 'What recommendations do you have based on this analysis?',
+        level: level,
         malwareDetails: {
           confidence: fileDetails.prediction_confidence || 0,
           label: fileDetails.prediction_label || 'Unknown',

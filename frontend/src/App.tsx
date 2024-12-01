@@ -17,6 +17,24 @@ import ProtectedRoute from './routes/ProtectedRoute';
 import { SocketProvider } from './context/SocketProvider';
 
 const theme = createTheme({
+  components: {
+    MuiBadge: {
+      styleOverrides: {
+        badge: {
+          top: '-5px',
+          right: '-5px',
+          backgroundColor: '#f44336',
+          color: '#fff',
+          fontSize: '0.75rem',
+          fontWeight: '600',
+          minWidth: '20px',
+          height: '20px',
+          borderRadius: '50%',
+          boxShadow: '0 0 5px rgba(244, 67, 54, 0.7)',
+        },
+      },
+    },
+  },
   typography: {
     fontSize: 14,
     h6: {

@@ -481,6 +481,7 @@ def dismiss_notification(notification_id):
 
         notification.is_dismissed = True
         db.session.commit()
+
         return jsonify({"message": "Notification dismissed successfully"}), 200
     except Exception as e:
         print(f"Error dismissing notification: {e}")
@@ -488,3 +489,18 @@ def dismiss_notification(notification_id):
             jsonify({"error": "An error occurred while dismissing the notification"}),
             500,
         )
+
+
+@routes.route("/api/notifications/<int:user_id>/count", methods=["GET"])
+def get_undismissed_alerts_count(user_id):
+    """
+    Fetch the count of undismissed notifications for a user.
+    """
+    try:
+        count = Notification.query.filter_by(
+            user_id=user_id, is_dismissed=False
+        ).count()
+        return jsonify({"count": count}), 200
+    except Exception as e:
+        logger.error(f"Error fetching undismissed notifications count: {str(e)}")
+        return jsonify({"error": "An error occurred while fetching the count"}), 500

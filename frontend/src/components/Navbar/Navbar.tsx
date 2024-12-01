@@ -25,6 +25,9 @@ import ShieldIcon from '@mui/icons-material/Shield';
 import HistoryIcon from '@mui/icons-material/History';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import SettingsIcon from '@mui/icons-material/Settings';
+import { useAuth } from '../../context/AuthProvider';
+import { useEffect, useState } from 'react';
+import { useSocket } from '../../context/SocketProvider';
 
 interface NavbarProps {
   email: string | null;
@@ -39,6 +42,29 @@ const Navbar: React.FC<NavbarProps> = ({
   onNavItemClick,
   activePage,
 }) => {
+  const { userID } = useAuth();
+  const socket = useSocket();
+  const [alertCount, setAlertCount] = useState(0);
+
+  const fetchAlertCount = async () => {
+    try {
+      const response = await fetch(`/api/notifications/${userID}/count`);
+      const data = await response.json();
+      setAlertCount(data.count || 0);
+    } catch (error) {
+      console.error('Error fetching alert count:', error);
+      setAlertCount(0);
+    }
+  };
+
+  useEffect(() => {
+    fetchAlertCount();
+
+    socket.on('update_alerts', () => {
+      fetchAlertCount();
+    });
+  }, [socket]);
+
   const navItems = [
     { label: 'Overview', icon: <HomeIcon />, contentKey: 'Overview' },
     { label: 'History', icon: <HistoryIcon />, contentKey: 'History' },
@@ -46,7 +72,7 @@ const Navbar: React.FC<NavbarProps> = ({
       label: 'Alerts',
       icon: <NotificationsIcon />,
       contentKey: 'Alerts',
-      badge: 3,
+      badge: alertCount,
     },
     { label: 'Settings', icon: <SettingsIcon />, contentKey: 'Settings' },
   ];
