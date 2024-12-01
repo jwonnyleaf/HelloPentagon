@@ -4,3 +4,9 @@ node_modules
 .DS_Store
 
 __pycache__
+
+.env
+
+# Backend #
+test/
+backend/app/database/pentagon.db
