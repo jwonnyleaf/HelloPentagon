@@ -1,10 +1,6 @@
-
 # HelloPentagon
 
 An IUI Malware Detector.
-
-
-
 
 ## Run Locally
 
@@ -20,30 +16,22 @@ Go to the project directory
   cd HelloPentagon
 ```
 
+You need to make a .env file with the following contents:
+```
+OPENAI_API_KEY=
+```
+
 Install Front-end Dependencies
 
 ```bash
   cd frontend
   npm install
-```
-
-Install Back-end Dependencies
-
-```bash
-  cd backend
-  pip install -r requirements.txt
+  npm run dev
 ```
 
 Run Server
 
 ```bash
   cd backend
-  python run.py
-```
-
-Run Page
-
-```bash
-  cd frontend
-  npm run dev
+  docker-compose down --rmi all && docker-compose up --build --force-recreate
 ```
