@@ -1,4 +1,5 @@
 import * as React from 'react';
+import axios from 'axios';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -11,9 +12,8 @@ import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
 import MuiCard from '@mui/material/Card';
 import { styled } from '@mui/material/styles';
-import ForgotPassword from './ForgetPassword';
 import { Navigate, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthProvider';
+import { useSnackbar } from '../../context/SnackbarProvider';
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: 'flex',
@@ -23,18 +23,18 @@ const Card = styled(MuiCard)(({ theme }) => ({
   padding: theme.spacing(4),
   gap: theme.spacing(2),
   margin: 'auto',
-  [theme.breakpoints.up('sm')]: {
-    maxWidth: '450px',
-  },
   boxShadow:
     'hsla(220, 30%, 5%, 0.05) 0px 5px 15px 0px, hsla(220, 25%, 10%, 0.05) 0px 15px 35px -5px',
+  [theme.breakpoints.up('sm')]: {
+    width: '450px',
+  },
   ...theme.applyStyles('dark', {
     boxShadow:
       'hsla(220, 30%, 5%, 0.5) 0px 5px 15px 0px, hsla(220, 25%, 10%, 0.08) 0px 15px 35px -5px',
   }),
 }));
 
-const SignInContainer = styled(Stack)(({ theme }) => ({
+const RegisterContainer = styled(Stack)(({ theme }) => ({
   height: 'calc((1 - var(--template-frame-height, 0)) * 100dvh)',
   minHeight: '100%',
   padding: theme.spacing(2),
@@ -57,67 +57,26 @@ const SignInContainer = styled(Stack)(({ theme }) => ({
   },
 }));
 
-const SignIn: React.FC = () => {
-  const { login } = useAuth();
+export default function Register() {
   const [emailError, setEmailError] = React.useState(false);
   const [emailErrorMessage, setEmailErrorMessage] = React.useState('');
   const [passwordError, setPasswordError] = React.useState(false);
   const [passwordErrorMessage, setPasswordErrorMessage] = React.useState('');
-  const [open, setOpen] = React.useState(false);
+  const [nameError, setNameError] = React.useState(false);
+  const [nameErrorMessage, setNameErrorMessage] = React.useState('');
 
   const navigate = useNavigate();
-
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-  };
+  const showSnackbar = useSnackbar();
 
   const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
   if (isAuthenticated) {
     return <Navigate to="/" replace />;
   }
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    const data = new FormData(event.currentTarget);
-    const email = data.get('email') as string;
-    const password = data.get('password') as string;
-
-    try {
-      const response = await fetch('/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        login(result.user['id'], result.user['email'], result.user['name']);
-        navigate('/');
-      } else {
-        const error = await response.json();
-        setEmailError(true);
-        setEmailErrorMessage(error.error || 'Invalid credentials');
-
-        const password = document.getElementById(
-          'password'
-        ) as HTMLInputElement;
-        password.value = '';
-      }
-    } catch (err) {
-      console.error('Unexpected error:', err);
-      setEmailError(true);
-      setEmailErrorMessage('An unexpected error occurred. Please try again.');
-    }
-  };
-
   const validateInputs = () => {
     const email = document.getElementById('email') as HTMLInputElement;
     const password = document.getElementById('password') as HTMLInputElement;
+    const name = document.getElementById('name') as HTMLInputElement;
 
     let isValid = true;
 
@@ -130,76 +89,109 @@ const SignIn: React.FC = () => {
       setEmailErrorMessage('');
     }
 
-    if (!password.value) {
+    if (!password.value || password.value.length < 6) {
       setPasswordError(true);
-      setPasswordErrorMessage('Password is required.');
+      setPasswordErrorMessage('Password must be at least 6 characters long.');
       isValid = false;
     } else {
       setPasswordError(false);
       setPasswordErrorMessage('');
     }
 
+    if (!name.value || name.value.length < 1) {
+      setNameError(true);
+      setNameErrorMessage('Name is required.');
+      isValid = false;
+    } else {
+      setNameError(false);
+      setNameErrorMessage('');
+    }
+
     return isValid;
+  };
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (nameError || emailError || passwordError) {
+      return;
+    }
+    const data = new FormData(event.currentTarget);
+
+    try {
+      const response = await axios.post('/api/register', data, {
+        headers: { 'Content-Type': 'application/json' },
+      });
+      showSnackbar('Registration Successful!', 'success');
+      navigate('/login');
+    } catch (error) {
+      showSnackbar('Registration failed. Please try again.', 'error');
+      const password = document.getElementById('password') as HTMLInputElement;
+      password.value = '';
+    }
   };
 
   return (
     <>
       <CssBaseline enableColorScheme />
-      <SignInContainer direction="column" justifyContent="space-between">
+      <RegisterContainer direction="column" justifyContent="space-between">
         <Card variant="outlined">
           <Typography
             component="h1"
             variant="h4"
             sx={{ width: '100%', fontSize: 'clamp(2rem, 10vw, 2.15rem)' }}
           >
-            Sign In
+            Sign Up
           </Typography>
           <Box
             component="form"
             onSubmit={handleSubmit}
-            noValidate
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              width: '100%',
-              gap: 2,
-            }}
+            sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
           >
+            <FormControl>
+              <FormLabel htmlFor="name">Full name</FormLabel>
+              <TextField
+                autoComplete="name"
+                name="name"
+                required
+                fullWidth
+                id="name"
+                placeholder="Jon Snow"
+                error={nameError}
+                helperText={nameErrorMessage}
+                color={nameError ? 'error' : 'primary'}
+              />
+            </FormControl>
             <FormControl>
               <FormLabel htmlFor="email">Email</FormLabel>
               <TextField
-                error={emailError}
-                helperText={emailErrorMessage}
-                id="email"
-                type="email"
-                name="email"
-                placeholder="your@email.com"
-                autoComplete="email"
-                autoFocus
                 required
                 fullWidth
+                id="email"
+                placeholder="your@email.com"
+                name="email"
+                autoComplete="email"
                 variant="outlined"
-                color={emailError ? 'error' : 'primary'}
+                error={emailError}
+                helperText={emailErrorMessage}
+                color={passwordError ? 'error' : 'primary'}
               />
             </FormControl>
             <FormControl>
               <FormLabel htmlFor="password">Password</FormLabel>
               <TextField
-                error={passwordError}
-                helperText={passwordErrorMessage}
+                required
+                fullWidth
                 name="password"
                 placeholder="••••••"
                 type="password"
                 id="password"
-                autoComplete="current-password"
-                autoFocus
-                required
-                fullWidth
+                autoComplete="new-password"
                 variant="outlined"
+                error={passwordError}
+                helperText={passwordErrorMessage}
                 color={passwordError ? 'error' : 'primary'}
               />
             </FormControl>
-            <ForgotPassword open={open} handleClose={handleClose} />
             <Button
               type="submit"
               fullWidth
@@ -207,31 +199,22 @@ const SignIn: React.FC = () => {
               onClick={validateInputs}
               sx={{ backgroundColor: '#087E8B', color: 'white' }}
             >
-              Sign In
+              Sign up
             </Button>
-            <Link
-              component="button"
-              type="button"
-              onClick={handleClickOpen}
-              variant="body2"
-              sx={{ alignSelf: 'center' }}
-            >
-              Forgot your password?
-            </Link>
           </Box>
-          <Divider>or</Divider>
+          <Divider>
+            <Typography sx={{ color: 'text.secondary' }}>or</Typography>
+          </Divider>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             <Typography sx={{ textAlign: 'center' }}>
-              Don&apos;t have an account?{' '}
-              <Link href="/signup" variant="body2" sx={{ alignSelf: 'center' }}>
-                Sign Up
+              Already have an account?{' '}
+              <Link href="/login" variant="body2" sx={{ alignSelf: 'center' }}>
+                Sign in
               </Link>
             </Typography>
           </Box>
         </Card>
-      </SignInContainer>
+      </RegisterContainer>
     </>
   );
-};
-
-export default SignIn;
+}

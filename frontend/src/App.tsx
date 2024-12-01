@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { createTheme, Snackbar, ThemeProvider } from '@mui/material';
+import { createTheme, ThemeProvider } from '@mui/material';
 import {
   BrowserRouter as Router,
   Routes,
@@ -9,8 +9,8 @@ import {
 import './App.css';
 import { SnackbarProvider } from './context/SnackbarProvider';
 import Dashboard from './components/Dashboard/Dashboard';
-import SignIn from './components/Account/SignIn';
-import SignUp from './components/Account/SignUp';
+import Login from './components/Account/Login';
+import Register from './components/Account/Register';
 import Results from './components/FileUpload/Results';
 import { AuthProvider } from './context/AuthProvider';
 import ProtectedRoute from './routes/ProtectedRoute';
@@ -57,8 +57,8 @@ function App() {
                   </ProtectedRoute>
                 }
               />
-              <Route path="/login" element={<SignIn />} />
-              <Route path="/signup" element={<SignUp />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
               <Route
                 path="*"
                 element={

@@ -126,8 +126,8 @@ def upload():
         return jsonify({"error": "Internal server error."}), 500
 
 
-@routes.route("/api/signup", methods=["POST"])
-def signup():
+@routes.route("/api/register", methods=["POST"])
+def register():
     try:
         data = request.json
         name = data.get("name")
@@ -175,7 +175,12 @@ def login():
             jsonify(
                 {
                     "message": "Login successful",
-                    "user": {"id": user.id, "email": user.email, "name": user.name},
+                    "user": {
+                        "id": user.id,
+                        "email": user.email,
+                        "name": user.name,
+                        "level": user.level,
+                    },
                 }
             ),
             200,
@@ -283,6 +288,7 @@ def chat():
     try:
         data = request.json
         query = data.get("query")
+        level = data.get("level")
         chat_history = data.get("chatHistory", [])
         malware_details = data.get("malwareDetails", {})
 
@@ -292,7 +298,7 @@ def chat():
         messages = [
             {
                 "role": "system",
-                "content": f"""You are a cybersecurity specialist who is discussing a malware incident with a client.
+                "content": f"""You are a cybersecurity specialist assisting a client. Provide explanations and recommendations tailored for a {level} user. Adjust the level of technical detail accordingly.
                 The client has provided you with the following email about the malware:
                 I ran malware analysis software on a file and received the following results:
                     - **Confidence Score**: {malware_details.get("confidence", 0)}
@@ -301,8 +307,7 @@ def chat():
 
                 Based on this analysis:
                 1. Provide a clear recommendation on how to handle the file (e.g., quarantine, delete, or ignore).
-                2. Justify your recommendation by explaining the reasoning behind it.
-                3. If applicable, include any additional precautions or steps the user should take to mitigate risks.
+                2. If applicable, include any additional precautions or steps the user should take to mitigate risks.
 
                 Ensure the recommendations are actionable and concise, tailored to the detected malware characteristics.""",
             },
@@ -331,3 +336,44 @@ def chat():
     except Exception as e:
         logger.error(f"Error in /api/chat: {str(e)}", exc_info=True)
         return jsonify({"error": "Failed to process the chat request."}), 500
+
+
+@routes.route("/api/set-level", methods=["PUT"])
+def set_level():
+    """
+    Update the proficiency level of a user.
+    """
+    try:
+        data = request.json
+        user_id = data.get("user_id")
+        level = data.get("level")
+
+        # Validate input
+        if not user_id or not level:
+            return jsonify({"error": "User ID and level are required."}), 400
+
+        if level not in ["Beginner", "Intermediate", "Expert"]:
+            return (
+                jsonify(
+                    {
+                        "error": "Invalid level. Choose Beginner, Intermediate, or Expert."
+                    }
+                ),
+                400,
+            )
+
+        # Retrieve the user from the database
+        user = User.query.get(user_id)
+
+        if not user:
+            return jsonify({"error": "User not found."}), 404
+
+        # Update the user's level
+        user.level = level
+        db.session.commit()
+
+        return jsonify({"message": "Proficiency level updated successfully!"}), 200
+
+    except Exception as e:
+        print(f"Error in /api/set-level: {e}")
+        return jsonify({"error": "An error occurred while updating the level."}), 500

@@ -10,8 +10,9 @@ class User(db.Model):
     name = db.Column(String, nullable=False)
     email = db.Column(String, unique=True, nullable=False)
     password = db.Column(String, nullable=False)
+    level = db.Column(String, nullable=True)
 
     files = db.relationship("File", back_populates="user", cascade="all, delete")
 
     def __repr__(self):
-        return f"<User ID={self.id}, Name={self.name}, Email={self.email}>"
+        return f"<User ID={self.id}, Name={self.name}, Email={self.email}, Level={self.level}>"

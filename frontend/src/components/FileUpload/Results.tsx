@@ -17,8 +17,10 @@ import 'react-circular-progressbar/dist/styles.css';
 import ProgressProvider from '../../context/ProgressProvider';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
+import { useAuth } from '../../context/AuthProvider';
 
 const ResultsPage: React.FC = () => {
+  const { level } = useAuth();
   const [chatMessages, setChatMessages] = useState<
     { sender: string; message: string }[]
   >([]);
@@ -102,6 +104,7 @@ const ResultsPage: React.FC = () => {
     try {
       const payload = {
         query: userMessage,
+        level: level,
         chatHistory: chatMessages,
         malwareDetails: {
           confidence: fileDetails?.prediction_confidence || 0,

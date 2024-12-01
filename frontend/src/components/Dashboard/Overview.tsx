@@ -21,6 +21,7 @@ import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
 
 import FileAnalysisCardIMG from '@assets/images/fileanalysisimage.png';
+import { useAuth } from '../../context/AuthProvider';
 
 interface NavbarProps {
   onNavItemClick: (contentKey: string) => void;
@@ -29,12 +30,15 @@ interface NavbarProps {
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip);
 
 const Overview: React.FC<NavbarProps> = ({ onNavItemClick }) => {
+  const { userID } = useAuth();
   const [chartData, setChartData] = useState<any>(null);
   const [threats, setThreats] = useState<number>(0);
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch('/api/user/1/files?last_week=true');
+        const response = await fetch(
+          `/api/user/${userID}/files?last_week=true`
+        );
         const data = await response.json();
 
         if (response.ok) {
